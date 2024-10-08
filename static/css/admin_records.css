@@ -1,0 +1,98 @@
+body {
+    background-color: #d9d9d9;
+    font-family: "Poppins";
+}
+
+/* Sidebar Styles */
+.sidenav {
+    height: 100%;
+    width: 150px;
+    position: fixed;
+    z-index: 1;
+    top: 0;
+    left: 0;
+    background-color: #FBFBFB;
+    padding-top: 20px;
+}
+
+.sidenav img {
+    width: 100%; /* Make logo responsive */
+    height: auto;
+    border-radius: 100%;
+    margin: -50px -10px 20px;
+}
+
+.sidenav a, .sidenav .active {
+    padding: 6px 32px;
+    text-decoration: none;
+    font-size: 15px;
+    color: #818181;
+    display: block;
+}
+
+.sidenav .active {
+    color: #0b62f8c1; /* Active link color */
+}
+
+.sidenav a:hover, .sidenav .active:hover {
+    color: #121111;
+}
+
+.add-request-button {
+    padding: 5px 10px;
+    position: absolute;
+    font-size: 15px;
+    font-weight: bold;
+    right: 10px;
+    color: #fff;
+    background-color: #C8161E;
+    border-radius: 50px;
+    border: none;
+    cursor: pointer;
+}
+
+/* Main Content Styles */
+.main {
+    margin-left: 150px; /* Same as the width of the sidenav */
+}
+
+.input-fields {
+    margin: 20px 0;
+}
+
+.box {
+    height: 30px;
+    width: 170px;
+    margin: 5px 40px 5px 0;
+    background-color: #fff;
+    border: none;
+}
+
+.box::placeholder {
+    color: #13131348;
+    opacity: 1;
+}
+
+/* Records Overview */
+.square {
+    height: 630px;
+    width: 1220px;
+    margin: 70px 30px;
+    border-radius: 3%;
+    background-color: #547aacbc;
+}
+
+.records-header {
+    display: flex;
+    justify-content: space-between;
+    padding: 10px;
+    background-color: #ffffffa4;
+    border-radius: 20%;
+    font-weight: bold;
+}
+
+/* Media Queries */
+@media screen and (max-height: 450px) {
+    .sidenav { padding-top: 15px; }
+    .sidenav a { font-size: 18px; }
+}

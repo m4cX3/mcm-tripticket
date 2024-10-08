@@ -1,0 +1,197 @@
+body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: white;
+}
+
+.header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px;
+    background-color: #ffffff;
+    border-bottom: 0px solid #ccc;
+}
+
+.header img {
+    height: 60px;
+}
+
+.header h2 {
+    margin: 0;
+    color: #14213d;
+    font-size: 16px;
+}
+
+/* Form container */
+.form-container {
+    width: calc 100% ; 
+    max-width: 90%; 
+    margin: 10px auto; 
+    background-color: #0F2554;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0px 0px 15px rgba(0, 0, 0, 0.2);
+}
+
+/* Header for the form */
+h1 {
+    text-align: center;
+    color: white;
+    margin-bottom: 10px;
+    font-size: 24px;
+}
+
+label {
+    font-weight: bold;
+    display: block;
+    margin-bottom: 5px;
+    font-size: 14px;
+    color: white;
+}
+
+input[type="text"],
+input[type="date"] {
+    width: calc(100% - 20px);
+    padding: 10px;
+    margin-bottom: 10px;
+    border: none;
+    border-radius: 5px;
+    background-color: #4D7398;
+    color: white;
+    box-shadow: inset 0 0 5px rgba(0, 0, 0, 0.2);
+    font-size: 14px;
+}
+
+input[type="text"]::placeholder {
+    color: white;
+}
+
+input[type="radio"] {
+    margin-right: 10px;
+}
+
+input[type="radio"] + label {
+    color: white;
+    display: inline-block;
+    margin-right: 10px;
+}
+
+#ownVehicleFields,
+#mcmVehicleFields {
+    margin-top: 20px;
+    padding: 10px;
+    border-radius: 8px;
+    background-color: #0F2554;
+}
+
+table {
+    width: 100%;
+    margin-top: 20px;
+    border-collapse: collapse;
+}
+
+table tr {
+    background-color: #14213d; 
+}
+
+table td {
+    padding: 10px;
+    background-color: #0F2554; 
+    border-radius: 5px;
+    color: white;
+}
+
+table input[type="text"] {
+    width: 90%;
+    padding: 12px;
+    border-radius: 8px;
+    border: none;
+    background-color: #4D7398; 
+    color: white;
+    text-align: center;
+    box-shadow: inset 0 0 5px rgba(0, 0, 0, 0.1);
+    font-size: 14px;
+}
+
+
+input[type="button"] {
+    background-color: #b90101;
+    color: white;
+    padding: 15px;
+    border: none;
+    border-radius: 8px;
+    font-size: 16px;
+    cursor: pointer;
+    width: 100%;
+    box-shadow: 0px 0px 8px rgba(0, 0, 0, 0.1);
+}
+/* "+" Button styling */
+input[type="submit"] {
+    background-color: #b90101;
+    color: white;
+    padding: 15px;
+    border: none;
+    border-radius: 8px;
+    font-size: 16px;
+    cursor: pointer;
+    width: 50%;
+    box-shadow: 0px 0px 8px rgba(0, 0, 0, 0.1);
+}
+
+input[type="button"]:hover,
+input[type="submit"]:hover {
+    background-color: #a30000;
+}
+
+#ownVehicleFields input[type="text"] {
+    margin-bottom: 10px;
+}
+
+#mcmVehicleFields {
+    display: flex;
+    justify-content: center; /* Centers the two elements horizontally */
+    align-items: center; /* Centers them vertically (optional, if needed) */
+    gap: 20px; /* Adds space between the two elements */
+    text-align: center;
+}
+
+.vehicle {
+    text-align: center;
+    flex: 0 1 auto; /* Prevents the elements from stretching */
+    margin: 10px;
+}
+
+input[type="button"]{
+    background-color: #850000;
+    color: white;
+    padding: 15px;
+    border: none;
+    border-radius: 8px;
+    font-size: 16px;
+    cursor: pointer;
+    width: 100%;
+    box-shadow: 0px 0px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* "Submit" Button styling */
+input[type="submit"] {
+    background-color: #d00000;
+    color: white;
+    padding: 15px;
+    border: none;
+    border-radius: 8px;
+    font-size: 16px;
+    cursor: pointer;
+    width: 100%;
+    box-shadow: 0px 0px 8px rgba(0, 0, 0, 0.1);
+}
+
+input[type="button"]:hover{
+    background-color: #a30000;
+}
+
+input[type="submit"]:hover {
+    background-color: #ff0000;
+}

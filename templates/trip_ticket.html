@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Trip Ticket Form</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/trip_ticket.css') }}" type="text/css" >
+    <script src="{{ url_for('static', filename='js/trip_ticket.js') }}"></script>   
+</head>
+<body>
+    <div class="header">
+        <img src="{{ url_for('static', filename='images/mmcm logo.png') }}" alt="MMCM Logo">
+        <h2>Institutional Facilities Office (IFO)</h2>
+    </div>
+    <div class="form-container">
+        <h1>Trip Ticket Form</h1>
+        <form action="/submit" method="POST">
+            <label for="dateFilled">Date Filled:</label>
+            <input type="date" id="dateFilled" name="dateFilled" required><br><br>
+            
+            <label for="requestedBy">Requested By:</label>
+            <input type="text" id="requestedBy" name="requestedBy"><br><br>
+    
+            <label for="department">Department:</label>
+            <input type="text" id="department" name="department"><br><br>
+    
+            <label for="purpose">Purpose of Trip:</label>
+            <input type="text" id="purpose" name="purpose"><br><br>
+    
+            <label>Will you use your own vehicle?:</label><br>
+            <input type="radio" id="ownVehicle" name="vehicle" value="Own Vehicle" onclick="toggleFields()" required> Yes
+            <input type="radio" id="mcmVehicle" name="vehicle" value="MCM Vehicle" onclick="toggleFields()" required> No<br><br>
+    
+            <!-- Fields for "Yes" option (own vehicle) -->
+            <div id="ownVehicleFields" style="display: none;">
+                <label for="ownVehicle_Name">Enter vehicle name:</label>
+                <input type="text" id="ownVehicle_Name" name="ownVehicle_Name">
+                <br><br>
+                <label for="ownVehicle_Classification">Enter classification:</label>
+                <input type="text" id="ownVehicle_Classification" name="ownVehicle_Classification">
+                <br><br>
+                <label for="ownVehicle_SeatingCapacity">Enter seating capacity:</label>
+                <input type="text" id="ownVehicle_SeatingCapacity" name="ownVehicle_SeatingCapacity">
+                <br><br>
+                <label for="ownVehicle_PlateNumber">Enter plate number:</label>
+                <input type="text" id="ownVehicle_PlateNumber" name="ownVehicle_PlateNumber">
+                <br><br><br>
+                <table id="ownVehicleTable">
+                    <tr>
+                        <td>Start Date</td>
+                        <td>Start Time</td>
+                        <td>Estimated Return</td>
+                        <td>Destinations</td>
+                    </tr>
+                    <tr>
+                        <td><input type="text" name="start_date[]" placeholder="Insert date & time here"></td>
+                        <td><input type="text" name="start_time[]" placeholder="Insert date & time here"></td>
+                        <td><input type="text" name="estimated_return[]" placeholder="Insert returning time here"></td>
+                        <td><input type="text" name="destinations[]" placeholder="Insert name of destinations here"></td>
+                    </tr>
+                    <tr>
+                        <td colspan="2"><input type="button" value="Click to add another row" onclick="addRow('ownVehicleTable')"></td>
+                        <td colspan="2"><input type="button" value="Delete last row" onclick="deleteRow('ownVehicleTable')"></td>
+                    </tr>
+                </table>                
+            </div>
+            
+            <!-- Fields for "No" option (MCM vehicle) -->
+            <div id="mcmVehicleFields" style="display: none;">
+                <br>
+                <h3>Select Vehicle</h3>
+                <div>
+                    {% for vehicle in vehicles %}
+                    <div class="vehicle">
+                        <h2>{{ vehicle.VehicleName }}</h2>
+                        <img src="{{ vehicle.VehicleImage }}" alt="{{ vehicle.VehicleName }}" style="max-width: 100px; max-height: 100px;">
+                        <div class="controls">
+                            <button type="button" onclick="updateQuantity('{{ vehicle.VehicleName }}', -1)">-</button>
+                            <input type="number" id="{{ vehicle.VehicleName }}_quantity" value="0" min="0" max="{{ vehicle.VehicleQuantity }}" data-vehicle-name="{{ vehicle.VehicleName }}" required>
+                            <button type="button" onclick="updateQuantity('{{ vehicle.VehicleName }}', 1)">+</button>
+                        </div>
+                        <p>Available: <strong>{{ vehicle.VehicleQuantity }}</strong></p>
+                        <p>Seating Capacity: {{ vehicle.VehicleSeatingCapacity }}</p>
+                        <input type="hidden" name="vehicle_name[]" value="{{ vehicle.VehicleName }}">
+                        <input type="hidden" id="{{ vehicle.VehicleName }}_selected_quantity" name="mcmVehicleQuantity[{{ vehicle.VehicleName }}]" value="0">
+                    </div>
+                    {% endfor %}
+                </div>
+                <table id="mcmVehicleTable">
+                    <tr>
+                        <td>Start Date</td>
+                        <td>Start Time</td>
+                        <td>Estimated Return</td>
+                        <td>Destinations</td>
+                    </tr>
+                    <tr>
+                        <td><input type="text" name="start_date[]" placeholder="Insert date & time here"></td>
+                        <td><input type="text" name="start_time[]" placeholder="Insert date & time here"></td>
+                        <td><input type="text" name="estimated_return[]" placeholder="Insert returning time here"></td>
+                        <td><input type="text" name="destinations[]" placeholder="Insert name of destinations here"></td>
+                    </tr>
+                    <tr>
+                        <td colspan="2"><input type="button" value="Click to add another row" onclick="addRow('mcmVehicleTable')"></td>
+                        <td colspan="2"><input type="button" value="Delete last row" onclick="deleteRow('mcmVehicleTable')"></td>
+                    </tr>
+                </table> 
+            </div>            
+            <input type="submit" value="Submit">
+        </form>    
+    </div>
+</body>
+</html>

@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link href='https://fonts.googleapis.com/css?family=Poppins' rel='stylesheet'>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/user_records.css') }}" type="text/css">
+    <title>User Records</title>
+</head>
+<body>
+    <div class="sidenav">
+        <img id="mcm" src="{{ url_for('static', filename='images/mmcm small logo.png') }}" alt="MMCM Logo">
+        <a href="#">Dashboard</a>
+        <a href="#">Requests</a>
+        <span class="active">Records</span>
+        <a href="#">Settings</a>
+        <button class="add-request-button">Add Request</button>
+    </div>
+
+    <div class="main">
+        <h2>Records Entry</h2>
+        <div class="input-fields">
+            <input class="box" placeholder="Enter Date Filled">
+            <input class="box" placeholder="Enter Name">
+            <input class="box" placeholder="Enter Start Date">
+        </div>
+        <div class="square">
+          <table>
+            <thead>
+              <tr class="header-row">
+                <th>Date Filled</th>
+                <th>Requested By</th>
+                <th>Vehicle Type</th>
+                <th>Start Date</th>
+                <th>Destinations</th>
+              </tr>
+            </thead>
+            <tr style="height: 10px;"> <!-- Spacer Row -->
+              <td colspan="3"></td>
+            </tr>
+            <tbody>
+              {% for record in own_records %}
+                <tr class="data-row">
+                  <td>{{ record['DateFilled'] }}</td>
+                  <td>{{ record['RequestedBy'] }}</td>
+                  <td>{{ record['VehicleType'] }}</td>
+                  <td>{{ record['StartDate'] }}</td>
+                  <td>{{ record['Destinations'] }}</td>
+                </tr>
+              {% else %}
+                <tr>
+                  <td colspan="4">No records found</td>
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+    </div>
+</body>
+</html>

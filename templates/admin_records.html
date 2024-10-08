@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link href='https://fonts.googleapis.com/css?family=Poppins' rel='stylesheet'>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/admin_records.css') }}" type="text/css">
+    <title>Admin Records</title>
+</head>
+<body>
+    <div class="sidenav">
+        <img id="mcm" src="{{ url_for('static', filename='images/mmcm small logo.png') }}" alt="MMCM Logo">
+        <a href="#">Dashboard</a>
+        <a href="#">Requests</a>
+        <span class="active">Records</span>
+        <a href="#">Settings</a>
+        <button class="add-request-button">Add Request</button>
+    </div>
+
+    <div class="main">
+        <h2>Records Entry</h2>
+        <div class="input-fields">
+            <input class="box" placeholder="Enter Date Filled">
+            <input class="box" placeholder="Enter Name">
+            <input class="box" placeholder="Enter Start Date">
+        </div>
+        <div class="square">
+            <h3>Records Overview</h3>
+            <div class="records-header">
+                <span>Date Filled</span>
+                <span>Name</span>
+                <span>Start Date</span>
+                <span>End Date</span>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
