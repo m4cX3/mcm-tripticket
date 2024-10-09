@@ -36,11 +36,7 @@ def user_records_page():
 @app.route('/user_records_detailed', methods=['GET'])
 def user_records_detailed_page():
     
-    start_date = request.args.get('start_date')
-    vehicle_type = request.args.get('vehicle_type')
-    requested_by = request.args.get('requested_by')
-
-    complete_details = show_specific_record(start_date, vehicle_type, requested_by)
+    complete_details = show_specific_record()
     return render_template('user_records_detailed.html', details=complete_details)
 
 @app.route('/trip_ticket')
