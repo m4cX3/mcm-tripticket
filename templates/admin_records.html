@@ -25,14 +25,36 @@
             <input class="box" placeholder="Enter Start Date">
         </div>
         <div class="square">
-            <h3>Records Overview</h3>
-            <div class="records-header">
-                <span>Date Filled</span>
-                <span>Name</span>
-                <span>Start Date</span>
-                <span>End Date</span>
-            </div>
-        </div>
+            <table>
+              <thead>
+                <tr class="header-row">
+                  <th>Date Filled</th>
+                  <th>Requested By</th>
+                  <th>Vehicle Type</th>
+                  <th>Start Date</th>
+                  <th>Destinations</th>
+                </tr>
+              </thead>
+              <tr style="height: 10px;"> <!-- Spacer Row -->
+                <td colspan="3"></td>
+              </tr>
+              <tbody>
+                {% for record in records %}
+                  <tr class="data-row">
+                    <td>{{ record['DateFilled'] }}</td>
+                    <td>{{ record['RequestedBy'] }}</td>
+                    <td>{{ record['VehicleType'] }}</td>
+                    <td>{{ record['StartDate'] }}</td>
+                    <td>{{ record['Destinations'] }}</td>
+                  </tr>
+                {% else %}
+                  <tr>
+                    <td colspan="4">No records found</td>
+                  </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
     </div>
 </body>
 </html>

@@ -6,7 +6,7 @@ body {
 /* Sidebar Styles */
 .sidenav {
     height: 100%;
-    width: 150px;
+    width: 175px;
     position: fixed;
     z-index: 1;
     top: 0;
@@ -24,6 +24,7 @@ body {
 
 .sidenav a, .sidenav .active {
     padding: 6px 32px;
+    margin-bottom: 25px;
     text-decoration: none;
     font-size: 15px;
     color: #818181;
@@ -40,10 +41,11 @@ body {
 
 .add-request-button {
     padding: 5px 10px;
+    margin-top: 250px;
+    margin-left: 35px;
     position: absolute;
     font-size: 15px;
     font-weight: bold;
-    right: 10px;
     color: #fff;
     background-color: #C8161E;
     border-radius: 50px;
@@ -53,7 +55,7 @@ body {
 
 /* Main Content Styles */
 .main {
-    margin-left: 150px; /* Same as the width of the sidenav */
+    margin-left: 195px; /* Same as the width of the sidenav */
 }
 
 .input-fields {
@@ -77,19 +79,64 @@ body {
 .square {
     height: 630px;
     width: 1220px;
-    margin: 70px 30px;
+    padding: 30px;
     border-radius: 3%;
     background-color: #547aacbc;
 }
-
-.records-header {
-    display: flex;
-    justify-content: space-between;
-    padding: 10px;
-    background-color: #ffffffa4;
-    border-radius: 20%;
-    font-weight: bold;
+  
+.square table {
+    width: 100%;
+    border-collapse: collapse;
+    border-spacing: 0 10px;
 }
+
+.header-row {
+    background-color: #ffffffb9; /* Background color of the header row */
+}
+
+.header-row th {
+    padding: 10px 20px;
+    color: rgb(0, 0, 0);
+    text-align: center;
+    border: none; /* Remove borders between header cells */
+}
+
+.header-row th:first-child {
+    border-top-left-radius: 10px; /* Smooth corners for the left side */
+    border-bottom-left-radius: 10px;
+}
+
+.header-row th:last-child {
+    border-top-right-radius: 10px; /* Smooth corners for the right side */
+    border-bottom-right-radius: 10px;
+}
+
+.data-row:nth-child(odd) {
+    background-color: #ffffffa6; /* Lighter color for odd rows */
+}
+
+.data-row:nth-child(even) {
+    background-color: #a0afd6; /* Darker color for even rows */
+}
+
+.data-row {
+    min-height: 50px;
+    padding: 10px 20px;
+    color: rgb(0, 0, 0);
+    text-align: center;
+    border: none;
+}
+    
+.data-row td:first-child {
+    border-top-left-radius: 7px; /* Smooth corners for the left side */
+    border-bottom-left-radius: 7px;
+}
+
+.data-row td:last-child {
+    border-top-right-radius: 7px; /* Smooth corners for the right side */
+    border-bottom-right-radius: 7px;
+}
+
 
 /* Media Queries */
 @media screen and (max-height: 450px) {

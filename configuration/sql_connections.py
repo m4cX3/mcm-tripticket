@@ -239,3 +239,57 @@ def show_records():
         if connection:
             connection.close()
 
+def show_all_records():
+    try:
+        connection = config_connection()
+        cursor = connection.cursor(dictionary=True)
+
+        # Fetch all records from own_ticketform and mcm_ticketform (no filtering by user)
+        cursor.execute(""" 
+            SELECT t.DateFilled, t.RequestedBy, t.VehicleType, d.StartDate, d.Destinations
+            FROM own_ticketform t
+            JOIN own_traveldetails d ON t.FormID = d.FormID
+            UNION ALL
+            SELECT m.DateFilled, m.RequestedBy, 'MCM Vehicle' AS VehicleType, md.StartDate, md.Destinations
+            FROM mcm_ticketform m
+            JOIN mcm_traveldetails md ON m.FormID = md.FormID
+        """)
+
+        own_records = cursor.fetchall()
+
+        # Group records by StartDate, VehicleType, and Destinations
+        grouped_records = {}
+        for record in own_records:
+            # Create a unique key by combining StartDate, VehicleType, and RequestedBy
+            unique_key = (record['StartDate'], record['VehicleType'], record['RequestedBy'])
+            if unique_key not in grouped_records:
+                grouped_records[unique_key] = {
+                    'DateFilled': record['DateFilled'],
+                    'RequestedBy': record['RequestedBy'],
+                    'VehicleType': record['VehicleType'],
+                    'Destinations': [record['Destinations']]
+                }
+            else:
+                grouped_records[unique_key]['Destinations'].append(record['Destinations'])
+
+        # Prepare the final output
+        final_records = []
+        for (start_date, vehicle_type, requested_by), details in grouped_records.items():
+            first_destination = details['Destinations'][0]
+            additional_count = len(details['Destinations']) - 1
+            details['Destinations'] = f"{first_destination} +{additional_count}" if additional_count > 0 else first_destination
+            details['StartDate'] = start_date
+            details['VehicleType'] = vehicle_type
+            final_records.append(details)
+
+        return final_records
+    except Exception as e:
+        print(f"Error retrieving own_ticketform and mcm_ticketform data: {str(e)}")
+        return []
+    finally:
+        if cursor:
+            cursor.close()
+        if connection:
+            connection.close()
+
+

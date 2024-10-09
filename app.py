@@ -1,5 +1,5 @@
 from flask import Flask, render_template, request, redirect, url_for, session
-from configuration.sql_connections import insert_own_data, insert_mcm_data, show_mcm_vehicles, show_records
+from configuration.sql_connections import insert_own_data, insert_mcm_data, show_mcm_vehicles, show_records, show_all_records
 from configuration.submitform import submitform
 from configuration.login import login, get_user_id
 
@@ -13,7 +13,11 @@ def login_page():
 
 @app.route('/admin_records', methods=['GET'])
 def admin_records_page():
-    return render_template('admin_records.html')
+
+    username = session.get('username')
+    records = show_all_records()
+
+    return render_template('admin_records.html', records=records, username=username)
 
 @app.route('/user_records', methods=['GET'])
 def user_records_page():
@@ -68,10 +72,10 @@ def insert_own_form_to_database():
 
     if user_id is not None:
         insert_own_data(form_data, user_id)
-        return redirect(url_for('trip_ticket_page', username=username))  # Redirect to trip ticket page after insert
+        return redirect(url_for('user_records_page', username=username))
     else:
         print("UserID not found for the given username.")
-        return redirect(url_for('trip_ticket_page', username=username))  # Redirect for error handling
+        return redirect(url_for('trip_ticket_page', username=username))
 
 @app.route('/mcm_tripticket_summary', methods=['GET', 'POST'])
 def mcm_tripticket_summary_page():
@@ -91,10 +95,10 @@ def insert_mcm_form_to_database():
 
     if user_id is not None:
         insert_mcm_data(form_data, user_id)
-        return redirect(url_for('trip_ticket_page', username=username))  # Redirect to trip ticket page after insert
+        return redirect(url_for('user_records_page', username=username))
     else:
         print("UserID not found for the given username.")
-        return redirect(url_for('trip_ticket_page', username=username))  # Redirect for error handling
+        return redirect(url_for('trip_ticket_page', username=username))
 
 if __name__ == '__main__':
     app.run(debug=True)

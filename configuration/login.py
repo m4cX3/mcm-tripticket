@@ -61,8 +61,9 @@ def login():
 
         if admin == 1:
             print("Admin login")
+            return redirect(url_for('admin_records_page', username=username))
         else:
             print("User login")
-            return redirect(url_for('trip_ticket_page', username=username))  # Redirect without passing email
+            return redirect(url_for('trip_ticket_page', username=username))
 
     return render_template('login.html', msg=msg)  # Render login page with msg if applicable
