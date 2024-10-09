@@ -1,0 +1,153 @@
+body {
+    background-color: #d9d9d9;
+    font-family: "Poppins";
+    margin: 0;
+    padding: 0;
+}
+
+/* Sidebar */
+.sidebar {
+    height: 100%;
+    width: 250px;
+    position: fixed;
+    top: 0;
+    left: 0;
+    background-color: #f1f1f1;
+    padding-top: 20px;
+    box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
+}
+
+.sidebar a {
+    padding: 15px 25px;
+    text-decoration: none;
+    font-size: 18px;
+    color: #333;
+    display: block;
+}
+
+.sidebar a:hover {
+    background-color: #ebebeb;
+    color: #007bff;
+}
+
+.badge-logo {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 20px;
+}
+
+.badge-logo img {
+    max-width: 100px;
+}
+
+/* Main content styling */
+.main-content {
+    margin-left: 270px;
+    padding: 20px;
+}
+
+/* Section headers */
+h1, h2, h3 {
+    color: #333;
+    margin-bottom: 10px;
+}
+
+/* Summary box at the top */
+.summary-box {
+    background-color: #547AAC;
+    padding: 20px;
+    color: white;
+    border-radius: 10px;
+    margin-bottom: 20px;
+    display: flex;
+    justify-content: space-between;
+}
+
+.summary-box ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.summary-box li {
+    margin-bottom: 8px;
+}
+
+/* Travel details box */
+.details-box {
+    background-color: #547AAC;
+    padding: 20px;
+    border-radius: 10px;
+    margin-bottom: 20px;
+}
+
+.details-box table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 10px;
+}
+
+.details-box th, .details-box td {
+    border: 1px solid #ccc;
+    padding: 10px;
+    text-align: center;
+}
+
+th {
+    background-color: #547AAC;
+    color: #fff;
+}
+
+td {
+    background-color: #fff;
+}
+
+/* Vehicle section */
+.vehicle-section {
+    display: flex;
+    background-color: #547AAC;
+    padding: 20px;
+    border-radius: 10px;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.vehicle-section img {
+    width: 150px;
+    margin-right: 20px;
+    border-radius: 8px;
+}
+
+.vehicle-info ul {
+    list-style: none;
+    padding: 0;
+}
+
+/* Buttons for Approve and Deny */
+.button-container {
+    display: flex;
+    justify-content: center;
+    margin-top: 30px;
+}
+
+.button-container button {
+    padding: 10px 40px;
+    font-size: 18px;
+    border: none;
+    color: white;
+    border-radius: 5px;
+    cursor: pointer;
+    margin: 0 20px;
+}
+
+.approve-button {
+    background-color: #00c853;
+}
+
+.deny-button {
+    background-color: #f44336;
+}
+
+button:hover {
+    opacity: 0.9;
+}

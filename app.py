@@ -1,5 +1,5 @@
 from flask import Flask, render_template, request, redirect, url_for, session
-from configuration.sql_connections import insert_own_data, insert_mcm_data, show_mcm_vehicles, show_records, show_all_records
+from configuration.sql_connections import insert_own_data, insert_mcm_data, show_mcm_vehicles, show_records, show_all_records, show_specific_record
 from configuration.submitform import submitform
 from configuration.login import login, get_user_id
 
@@ -19,6 +19,12 @@ def admin_records_page():
 
     return render_template('admin_records.html', records=records, username=username)
 
+@app.route('/admin_records_detailed', methods=['GET'])
+def admin_records_detailed_page():
+    complete_details = show_specific_record()
+    print(complete_details)
+    return render_template('admin_records_detailed.html', details=complete_details)
+
 @app.route('/user_records', methods=['GET'])
 def user_records_page():
     
@@ -29,8 +35,13 @@ def user_records_page():
 
 @app.route('/user_records_detailed', methods=['GET'])
 def user_records_detailed_page():
+    
+    start_date = request.args.get('start_date')
+    vehicle_type = request.args.get('vehicle_type')
+    requested_by = request.args.get('requested_by')
 
-    return render_template('user_records_detailed.html')
+    complete_details = show_specific_record(start_date, vehicle_type, requested_by)
+    return render_template('user_records_detailed.html', details=complete_details)
 
 @app.route('/trip_ticket')
 def trip_ticket_page():

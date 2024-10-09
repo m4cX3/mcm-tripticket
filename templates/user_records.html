@@ -6,17 +6,24 @@
     <link href='https://fonts.googleapis.com/css?family=Poppins' rel='stylesheet'>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/user_records.css') }}" type="text/css">
     <title>User Records</title>
+    <script>
+      function redirectToDetails(startDate, vehicleType, requestedBy) {
+        // Redirect to the details page with query parameters
+        window.location.href = `/admin_records_detailed?start_date=${encodeURIComponent(startDate)}&vehicle_type=${encodeURIComponent(vehicleType)}&requested_by=${encodeURIComponent(requestedBy)}`;
+    }
+    </script>
 </head>
 <body>
-    <div class="sidenav">
+    <div class="sidebar">
+      <div class="badge-logo">
         <img id="mcm" src="{{ url_for('static', filename='images/mmcm small logo.png') }}" alt="MMCM Logo">
-        <a href="#">Dashboard</a>
-        <a href="#">Requests</a>
-        <span class="active">Records</span>
-        <a href="#">Settings</a>
-        <button class="add-request-button">Add Request</button>
     </div>
-    <div class="main">
+    <a href="#">Dashboard</a>
+    <a href="#">Requests</a>
+    <a href="#">Records</a>
+    <a href="#">Settings</a>
+    </div>  
+    <div class="main-content">
         <h2>Records Entry</h2>
         <div class="input-fields">
             <input class="box" placeholder="Enter Date Filled">
@@ -39,7 +46,7 @@
             </tr>
             <tbody>
               {% for record in own_records %}
-                <tr class="data-row">
+                <tr class="data-row" onclick="redirectToDetails('{{ record['StartDate'] }}', '{{ record['VehicleType'] }}', '{{ record['RequestedBy'] }}')">
                   <td>{{ record['DateFilled'] }}</td>
                   <td>{{ record['RequestedBy'] }}</td>
                   <td>{{ record['VehicleType'] }}</td>

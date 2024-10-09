@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Form Summary</title>
+    <link href='https://fonts.googleapis.com/css?family=Poppins' rel='stylesheet'>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/admin_records_detailed.css') }}" type="text/css">
+    
+</head>
+<body>
+    <!-- Sidebar -->
+    <div class="sidebar">
+        <div class="badge-logo">
+            <img id="mcm" src="{{ url_for('static', filename='images/mmcm small logo.png') }}" alt="MMCM Logo">
+        </div>
+        <a href="#">Dashboard</a>
+        <a href="#">Requests</a>
+        <a href="#">Records</a>
+        <a href="#">Settings</a>
+    </div>
+
+    <!-- Main content -->
+    <div class="main-content">
+        <!-- Summary box -->
+        <div class="summary-box">
+            <ul>
+                <li><strong>Date Filled:</strong> {{ details[0]['DateFilled'] }}</li>
+                <li><strong>Requested By:</strong> {{ details[0]['RequestedBy'] }}</li>
+                <li><strong>Department:</strong> {{ details[0]['Department'] }} </li>
+                <li><strong>Purpose of Trip:</strong> {{ details[0]['Purpose_Of_Trip'] }}</li>
+                <li><strong>Vehicle Type:</strong> {{ details[0]['VehicleType'] }}</li>
+                <br>
+                <li><strong>Vehicle Name:</strong> {{ details[0]['VehicleName'] }}</li>
+                <li><strong>Vehicle Classification:</strong> {{ details[0]['Classification'] }}</li>
+                <li><strong>Vehicle Seating Capcity:</strong> {{ details[0]['SeatingCapacity'] }}</li>
+                <li><strong>Vehicle Plate Number:</strong> {{ details[0]['PlateNumber'] }}</li>
+            </ul>
+        </div>
+        <div class="details-box">
+            <h3>Travel Details:</h3>
+            <table>
+                <tr>
+                    <th>Start Date</th>
+                    <th>Start Time</th>
+                    <th>Estimated Return</th>
+                    <th>Destinations</th>
+                </tr>
+                {% for travel in details %}
+                    <tr>
+                        <td>{{ travel.StartDate }}</td>
+                        <td>{{ travel.StartTime }}</td>
+                        <td>{{ travel.EstimatedReturns }}</td>
+                        <td>{{ travel.Destinations }}</td>
+                    </tr>
+                {% endfor %}
+            </table>
+        </div>
+        
+    </div>
+</body>
+</html>

@@ -1,42 +1,43 @@
 body {
     background-color: #d9d9d9;
     font-family: "Poppins";
+    margin: 0;
+    padding: 0;
 }
 
-/* Sidebar Styles */
-.sidenav {
+/* Sidebar */
+.sidebar {
     height: 100%;
-    width: 175px;
+    width: 250px;
     position: fixed;
-    z-index: 1;
     top: 0;
     left: 0;
-    background-color: #FBFBFB;
+    background-color: #f1f1f1;
     padding-top: 20px;
+    box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
 }
 
-.sidenav img {
-    width: 100%; /* Make logo responsive */
-    height: auto;
-    border-radius: 100%;
-    margin: -50px -10px 20px;
-}
-
-.sidenav a, .sidenav .active {
-    padding: 6px 32px;
-    margin-bottom: 25px;
+.sidebar a {
+    padding: 15px 25px;
     text-decoration: none;
-    font-size: 15px;
-    color: #818181;
+    font-size: 18px;
+    color: #333;
     display: block;
 }
 
-.sidenav .active {
-    color: #0b62f8c1; /* Active link color */
+.sidebar a:hover {
+    background-color: #ebebeb;
+    color: #007bff;
 }
 
-.sidenav a:hover, .sidenav .active:hover {
-    color: #121111;
+.badge-logo {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 20px;
+}
+
+.badge-logo img {
+    max-width: 100px;
 }
 
 .add-request-button {
@@ -54,8 +55,9 @@ body {
 }
 
 /* Main Content Styles */
-.main {
-    margin-left: 195px; /* Same as the width of the sidenav */
+.main-content {
+    margin-left: 270px;
+    padding: 20px;
 }
 
 .input-fields {
@@ -77,8 +79,8 @@ body {
 
 /* Records Overview */
 .square {
-    height: 630px;
-    width: 1220px;
+    height: 1200px;
+    width: auto;
     padding: 30px;
     border-radius: 3%;
     background-color: #547aacbc;

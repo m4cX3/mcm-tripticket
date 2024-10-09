@@ -1,4 +1,4 @@
-from flask import session
+from flask import session, request
 import mysql.connector
 from mysql.connector import Error
 
@@ -292,4 +292,43 @@ def show_all_records():
         if connection:
             connection.close()
 
+def show_specific_record():
+    try:
+        connection = config_connection()
+        cursor = connection.cursor(dictionary=True)
 
+        start_date = request.args.get('start_date')
+        vehicle_type = request.args.get('vehicle_type')
+        requested_by = request.args.get('requested_by')
+
+        if vehicle_type == 'Own Vehicle':
+            cursor.execute("""
+                SELECT * FROM own_ticketform t
+                JOIN own_traveldetails d ON t.FormID = d.FormID
+                WHERE d.StartDate = %s AND t.RequestedBy = %s
+            """, (start_date, requested_by))
+
+            vehicle = cursor.fetchall()
+            
+            return vehicle
+        
+        else:  # Assuming vehicle_type is 'MCM Vehicle'
+            cursor.execute("""
+                SELECT * FROM mcm_ticketform m
+                JOIN mcm_traveldetails md ON m.FormID = md.FormID
+                WHERE md.StartDate = %s AND m.RequestedBy = %s
+            """, (start_date, requested_by))
+            
+            vehicle = cursor.fetchall()
+
+            return vehicle
+        
+    except Exception as e:
+        print(f"Error retrieving complete details: {str(e)}")
+        return []
+    
+    finally:
+        if cursor:
+            cursor.close()
+        if connection:
+            connection.close()
