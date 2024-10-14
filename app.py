@@ -6,10 +6,46 @@ from configuration.login import login, get_user_id
 app = Flask(__name__)
 app.secret_key = 'your_secret_key'
 
+@app.route('/')
+def home_page():
+    data = [
+        {
+          'label': "Toyota Hiace Granda",
+          'quantity': 2,
+          'status': "Available",
+          'image': "/static/images/vehicle/toyota-hiace-grandia.jpg"
+        },
+        {
+          'label': "Yellow Bus",
+          'quantity': 3,
+          'status': "Not Available",
+          'image': "/static/images/vehicle/yellow-bus.jpg"
+        },
+        {
+          'label': "Toyota Hilux (Cabin)",
+          'quantity': 1,
+          'status': "Available",
+          "image": "/static/images/vehicle/toyota-hilux(cabin).webp"
+        },
+      ]
+    return render_template('home.html', data=data)
 @app.route('/login', methods=['GET', 'POST'])
 def login_page():
     
     return login()
+
+@app.route('/admin_dashboard', methods=['GET', 'POST'])
+def admin_dashboard_page():
+    
+    username = session.get('username')
+    return render_template('admin_dashboard.html', username=username)
+
+@app.route('/user_dashboard', methods=['GET', 'POST'])
+def user_dashboard_page():
+    
+    username = session.get('username')
+
+    return render_template('user_dashboard.html', username=username)
 
 @app.route('/admin_records', methods=['GET'])
 def admin_records_page():
@@ -38,6 +74,13 @@ def user_records_detailed_page():
     
     complete_details = show_specific_record()
     return render_template('user_records_detailed.html', details=complete_details)
+
+@app.route('/terms_and_conditions', methods=['GET'])
+def terms_and_conditions_page():
+
+    username = session.get('username')
+
+    return render_template('terms_and_conditions.html', username=username)
 
 @app.route('/trip_ticket')
 def trip_ticket_page():

@@ -1,66 +1,69 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <link href='https://fonts.googleapis.com/css?family=Poppins' rel='stylesheet'>
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/user_records.css') }}" type="text/css">
-    <title>User Records</title>
-    <script>
-      function redirectToDetails(startDate, vehicleType, requestedBy) {
-        // Redirect to the details page with query parameters
-        window.location.href = `/user_records_detailed?start_date=${encodeURIComponent(startDate)}&vehicle_type=${encodeURIComponent(vehicleType)}&requested_by=${encodeURIComponent(requestedBy)}`;
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link href='https://fonts.googleapis.com/css?family=Poppins' rel='stylesheet'>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/user_records.css') }}" type="text/css">
+  <title>User Records</title>
+  <script>
+    function redirectToDetails(startDate, vehicleType, requestedBy) {
+      // Redirect to the details page with query parameters
+      window.location.href = `/user_records_detailed?start_date=${encodeURIComponent(startDate)}&vehicle_type=${encodeURIComponent(vehicleType)}&requested_by=${encodeURIComponent(requestedBy)}`;
     }
-    </script>
+  </script>
 </head>
+
 <body>
-    <div class="sidebar">
-      <div class="badge-logo">
-        <img id="mcm" src="{{ url_for('static', filename='images/mmcm small logo.png') }}" alt="MMCM Logo">
+  <div class="sidebar">
+    <div class="badge-logo">
+      <img id="mcm" src="{{ url_for('static', filename='images/mmcm small logo.png') }}" alt="MMCM Logo">
     </div>
-    <a href="#">Dashboard</a>
-    <a href="#">Requests</a>
-    <a href="#">Records</a>
-    <a href="#">Settings</a>
-    </div>  
-    <div class="main-content">
-        <h2>Records Entry</h2>
-        <div class="input-fields">
-            <input class="box" placeholder="Enter Date Filled">
-            <input class="box" placeholder="Enter Name">
-            <input class="box" placeholder="Enter Start Date">
-        </div>
-        <div class="square">
-          <table>
-            <thead>
-              <tr class="header-row">
-                <th>Date Filled</th>
-                <th>Requested By</th>
-                <th>Vehicle Type</th>
-                <th>Start Date</th>
-                <th>Destinations</th>
-              </tr>
-            </thead>
-            <tr style="height: 10px;"> <!-- Spacer Row -->
-              <td colspan="3"></td>
-            </tr>
-            <tbody>
-              {% for record in own_records %}
-                <tr class="data-row" onclick="redirectToDetails('{{ record['StartDate'] }}', '{{ record['VehicleType'] }}', '{{ record['RequestedBy'] }}')">
-                  <td>{{ record['DateFilled'] }}</td>
-                  <td>{{ record['RequestedBy'] }}</td>
-                  <td>{{ record['VehicleType'] }}</td>
-                  <td>{{ record['StartDate'] }}</td>
-                  <td>{{ record['Destinations'] }}</td>
-                </tr>
-              {% else %}
-                <tr>
-                  <td colspan="4">No records found</td>
-                </tr>
-              {% endfor %}
-            </tbody>
-          </table>
-        </div>
+    <a href='{{ url_for('user_dashboard_page', username=username) }}'>Dashboard</a>
+    <a href='{{ url_for('user_records_page', username=username) }}'>Records</a>
+    <button class="add-request-button" onclick="location.href='{{ url_for('terms_and_conditions_page', username=username) }}'">Add Request</button>
+  </div>
+  <div class="main-content">
+    <h2>Records Entry</h2>
+    <div class="input-fields">
+      <input class="box" placeholder="Enter Date Filled">
+      <input class="box" placeholder="Enter Name">
+      <input class="box" placeholder="Enter Start Date">
     </div>
+    <div class="square">
+      <table>
+        <thead>
+          <tr class="header-row">
+            <th>Date Filled</th>
+            <th>Requested By</th>
+            <th>Vehicle Type</th>
+            <th>Start Date</th>
+            <th>Destinations</th>
+          </tr>
+        </thead>
+        <tr style="height: 10px;"> <!-- Spacer Row -->
+          <td colspan="3"></td>
+        </tr>
+        <tbody>
+          {% for record in own_records %}
+          <tr class="data-row"
+            onclick="redirectToDetails('{{ record['StartDate'] }}', '{{ record['VehicleType'] }}', '{{ record['RequestedBy'] }}')">
+            <td>{{ record['DateFilled'] }}</td>
+            <td>{{ record['RequestedBy'] }}</td>
+            <td>{{ record['VehicleType'] }}</td>
+            <td>{{ record['StartDate'] }}</td>
+            <td>{{ record['Destinations'] }}</td>
+          </tr>
+          {% else %}
+          <tr>
+            <td colspan="4">No records found</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
 </body>
+
 </html>

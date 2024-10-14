@@ -14,15 +14,15 @@
     </script>
 </head>
 <body>
-   <div class="sidebar">
-      <div class="badge-logo">
-        <img id="mcm" src="{{ url_for('static', filename='images/mmcm small logo.png') }}" alt="MMCM Logo">
+  <div class="sidebar">
+    <div class="badge-logo">
+      <img id="mcm" src="{{ url_for('static', filename='images/mmcm small logo.png') }}" alt="MMCM Logo">
     </div>
-    <a href="#">Dashboard</a>
+    <a href='{{ url_for('admin_dashboard_page', username=username) }}'>Dashboard</a>
     <a href="#">Requests</a>
-    <a href="#">Records</a>
-    <a href="#">Settings</a>
-    </div>  
+    <a href='{{ url_for('admin_records_page', username=username) }}'>Records</a>
+    <a href="#">Vehicles</a>
+  </div>
 
     <div class="main-content">
         <h2>Records Entry</h2>

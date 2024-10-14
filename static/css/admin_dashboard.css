@@ -1,0 +1,48 @@
+.chart-container {
+    width: 500px;
+    margin: 20px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: white ;
+}
+
+/* Sidebar */
+.sidebar {
+    height: 100%;
+    width: 250px;
+    position: fixed;
+    top: 0;
+    left: 0;
+    background-color: #f1f1f1;
+    padding-top: 20px;
+    box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
+  }
+  
+.sidebar a {
+padding: 15px 25px;
+text-decoration: none;
+font-size: 18px;
+color: #333;
+display: block;
+}
+
+.sidebar a:hover {
+background-color: #ebebeb;
+color: #007bff;
+}
+
+.badge-logo {
+display: flex;
+justify-content: center;
+margin-bottom: 20px;
+}
+
+.badge-logo img {
+max-width: 100px;
+}
+
+.main-content {
+margin-left: 270px;
+padding: 20px;
+}

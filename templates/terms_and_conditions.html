@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://fonts.googleapis.com/css?family=Poppins" rel="stylesheet" />
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/variables.css') }}" type="text/css" />
+    <title>Terms And Conditions</title>
+    <style>
+        body {
+            display: grid;
+            grid-template-columns: 340px 1fr;
+            height: 100dvh;
+            color: var(--foreground);
+        }
+        aside {
+            background-color: var(--background);
+            color: var(--foreground);
+            padding: 1rem;
+            display: grid;
+            place-items: center;
+            gap: 1rem;
+        }
+        aside img {
+            width: 100%;
+        }
+        aside a {
+            text-decoration: none;
+            color: var(--foreground);
+            padding: 0.5rem;
+            border-radius: 5px;
+            transition: background-color 0.3s;
+        }
+        .add-request-button {
+            background-color: var(--primary);
+            color: var(--background);
+            padding: 0.5rem 1rem;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+            margin-top: auto;
+        }
+        main {
+            padding: 2.2rem;
+            background: var(--muted);
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+            text-align: justify;
+        }
+        .card {
+            padding: 3rem;
+            background-color: #C8C8C8;
+            border-radius: 50px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);  
+        }
+        h1 {
+            text-decoration: underline;
+            margin-bottom: 2rem;
+        }
+        p {
+            margin-bottom: 2rem;
+        }
+        #countdown {
+            margin-top: 2rem;
+            font-size: 1.5rem;
+            text-align: center;
+        }
+        #continue-button {
+            display: none; /* Hidden until the timer finishes */
+            background-color: var(--primary);
+            color: var(--background);
+            padding: 1rem 2rem;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+            margin-top: 1rem;
+        }
+    </style>
+</head>
+<body>
+    <aside>
+        <img src="{{ url_for('static', filename='images/mmcm small logo.png') }}" alt="MMCM Logo">
+    </aside>
+    <main>
+        <h1>Terms & Conditions</h1>
+        <p>Please read the following rules before continuing.</p>
+        <div class="card">
+            <h1>Use of vehicles for Official Trips</h1>
+            <p>1. MMCM ensures the use of vehicles including but not limited to MMCM official vehicles, Officer’s Car Plan Vehicles, and personal vehicles to support business activities and in the performance of employee’s regular duties and functions.</p>
+            <p>2. MMCM ensures that company drivers or any authorized employee know and abide to the driving laws and regulations in all areas when using the vehicle in official business.</p>
+            <p>3. MMCM establishes mechanism to ensure that company vehicles are in accordance with all applicable laws and regulations and are being subjected to periodic maintenance.</p>
+            <p>4. Prioritization on the use of vehicles is based on the nature, purpose, and urgency of task.</p>
+            <p>5. Reimbursement of gasoline and toll expenses is subject to the terms and conditions prescribe by institution.</p>
+        </div>
+        <div id="countdown">5</div>
+        <button id="continue-button" onclick="location.href='{{ url_for('trip_ticket_page', username=username) }}'">Continue</button>
+    </main>
+    <script>
+        let countdown = 5;
+        const countdownElement = document.getElementById('countdown');
+        const continueButton = document.getElementById('continue-button');
+
+        const timer = setInterval(() => {
+            countdown--;
+            countdownElement.textContent = countdown;
+            if (countdown <= 0) {
+                clearInterval(timer);
+                countdownElement.style.display = 'none'; // Hide countdown
+                continueButton.style.display = 'block'; // Show continue button
+            }
+        }, 1000);
+    </script>
+</body>
+</html>
