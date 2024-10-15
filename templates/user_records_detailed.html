@@ -23,19 +23,30 @@
     <div class="main-content">
         <!-- Summary box -->
         <div class="summary-box">
-            <ul>
-                <li><strong>Date Filled:</strong> {{ details[0]['DateFilled'] }}</li>
-                <li><strong>Requested By:</strong> {{ details[0]['RequestedBy'] }}</li>
-                <li><strong>Department:</strong> {{ details[0]['Department'] }} </li>
-                <li><strong>Purpose of Trip:</strong> {{ details[0]['Purpose_Of_Trip'] }}</li>
-                <li><strong>Vehicle Type:</strong> {{ details[0]['VehicleType'] }}</li>
-                <br>
-                <li><strong>Vehicle Name:</strong> {{ details[0]['VehicleName'] }}</li>
-                <li><strong>Vehicle Classification:</strong> {{ details[0]['Classification'] }}</li>
-                <li><strong>Vehicle Seating Capcity:</strong> {{ details[0]['SeatingCapacity'] }}</li>
-                <li><strong>Vehicle Plate Number:</strong> {{ details[0]['PlateNumber'] }}</li>
-            </ul>
+            {% if details %}
+                <ul>
+                    <li><strong>Date Filled:</strong> {{ details[0]['DateFilled'] }}</li>
+                    <li><strong>Requested By:</strong> {{ details[0]['RequestedBy'] }}</li>
+                    <li><strong>Department:</strong> {{ details[0]['Department'] }}</li>
+                    <li><strong>Purpose of Trip:</strong> {{ details[0]['Purpose_Of_Trip'] }}</li>
+                    <li><strong>Vehicle Type:</strong> {{ details[0]['VehicleType'] }}</li>
+                    <br>
+                    
+                    {% if details[0]['VehicleType'] == "Own Vehicle" %}
+                        <li><strong>Vehicle Name:</strong> {{ details[0]['VehicleName'] }}</li>
+                        <li><strong>Vehicle Classification:</strong> {{ details[0]['Classification'] }}</li>
+                        <li><strong>Vehicle Seating Capacity:</strong> {{ details[0]['SeatingCapacity'] }}</li>
+                        <li><strong>Vehicle Plate Number:</strong> {{ details[0]['PlateNumber'] }}</li>
+                    {% elif details[0]['VehicleType'] == "MCM Vehicle" %}
+                        <li><strong>Vehicle Name:</strong> {{ details[0]['VehicleName'] }}</li>
+                        <li><strong>Vehicle Quantity:</strong> {{ details[0]['VehicleQuantity'] }}</li>
+                    {% endif %}
+                </ul>
+            {% else %}
+                <p>No vehicle details available for the selected criteria.</p>
+            {% endif %}
         </div>
+        
         <div class="details-box">
             <h3>Travel Details:</h3>
             <table>

@@ -314,8 +314,10 @@ def show_specific_record():
         
         else:  # Assuming vehicle_type is 'MCM Vehicle'
             cursor.execute("""
-                SELECT * FROM mcm_ticketform m
+                SELECT m.*, md.*, v.VehicleName, v.VehicleQuantity
+                FROM mcm_ticketform m
                 JOIN mcm_traveldetails md ON m.FormID = md.FormID
+                JOIN mcm_vehicledetails v ON v.FormID = md.FormID
                 WHERE md.StartDate = %s AND m.RequestedBy = %s
             """, (start_date, requested_by))
             
