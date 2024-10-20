@@ -6,7 +6,45 @@
     <title>Form Summary</title>
     <link href='https://fonts.googleapis.com/css?family=Poppins' rel='stylesheet'>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/admin_records_detailed.css') }}" type="text/css">
+    <script>
+        // Function to deny the request and collect remarks
+        function denyRequest(username, travelStartDate, vehicleType, requestedBy) {
+            var remarks = prompt("Enter remarks for denial:"); // Prompt user for remarks
+            if (remarks === null) {
+                // User clicked "Cancel"
+                return;
+            }
+            if (remarks.trim() === '') {
+                alert('Please enter remarks.');
+                return;
+            }
     
+            // Send data to the backend via POST request
+            fetch('/deny_request', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    'username': username,
+                    'remarks': remarks,
+                    'start_date': travelStartDate,  // Include start date
+                    'vehicle_type': vehicleType,    // Include vehicle type
+                    'requested_by': requestedBy     // Include the requester
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    alert('Request Denied');
+                    window.location.href = '/admin_dashboard?username=' + username;  // Redirect to requests page after denying
+                } else {
+                    alert('Error denying request');
+                }
+            })
+            .catch(error => console.error('Error:', error));
+        }
+    </script>    
 </head>
 <body>
     <!-- Sidebar -->
@@ -14,14 +52,23 @@
         <div class="badge-logo">
             <img id="mcm" src="{{ url_for('static', filename='images/mmcm small logo.png') }}" alt="MMCM Logo">
         </div>
-        <a href="#">Dashboard</a>
-        <a href="#">Requests</a>
-        <a href="#">Records</a>
-        <a href="#">Settings</a>
+        <a href='{{ url_for('admin_dashboard_page', username=username) }}'>Dashboard</a>
+        <a href='{{ url_for('admin_requests_page', username=username) }}'>Requests</a>
+        <a href='{{ url_for('admin_records_page', username=username) }}'>Records</a>
+        <a href="#">Vehicles</a>
     </div>
 
     <!-- Main content -->
     <div class="main-content">
+        {% if details[0]['Approval'] == 0 and details[0]['Remarks'] is none %}
+        <h3>This is a pending request</h3>
+        {% endif %}
+        {% if details[0]['Approval'] == 0 and details[0]['Remarks'] is not none %}
+        <h3>Request has been denied</h3>
+        {% endif %}
+        {% if details[0]['Approval'] == 1 %}
+        <h3>Request has been accepted</h3>
+        {% endif %}
         <!-- Summary box -->
         <div class="summary-box">
             <ul>
@@ -35,6 +82,9 @@
                 <li><strong>Vehicle Classification:</strong> {{ details[0]['Classification'] }}</li>
                 <li><strong>Vehicle Seating Capcity:</strong> {{ details[0]['SeatingCapacity'] }}</li>
                 <li><strong>Vehicle Plate Number:</strong> {{ details[0]['PlateNumber'] }}</li>
+                {% if details[0]['Remarks'] is not none %}
+                <li><strong>Remarks for Denial: </strong> {{ details[0]['Remarks']}}</li>
+                {% endif %}
             </ul>
         </div>
         <div class="details-box">
@@ -56,7 +106,12 @@
                 {% endfor %}
             </table>
         </div>
-        
+        {% if details[0]['Approval'] == 0 %}
+        <div class="button-container">
+            <input type="button" id="deny" name="deny" value="Deny" class="deny-button" onclick="denyRequest('{{ username }}')">
+            <input type="submit" id="submit" name="submit" value="Approve" class="approve-button">
+        </div>
+        {% endif %}
     </div>
 </body>
 </html>

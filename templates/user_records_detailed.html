@@ -21,6 +21,15 @@
 
     <!-- Main content -->
     <div class="main-content">
+        {% if details[0]['Approval'] == 0 and details[0]['Remarks'] is none %}
+        <h3>This is a pending request</h3>
+        {% endif %}
+        {% if details[0]['Approval'] == 0 and details[0]['Remarks'] is not none %}
+        <h3>Your request has been denied</h3>
+        {% endif %}
+        {% if details[0]['Approval'] == 1 %}
+        <h3>Request has been accepted</h3>
+        {% endif %}
         <!-- Summary box -->
         <div class="summary-box">
             {% if details %}
@@ -40,6 +49,10 @@
                     {% elif details[0]['VehicleType'] == "MCM Vehicle" %}
                         <li><strong>Vehicle Name:</strong> {{ details[0]['VehicleName'] }}</li>
                         <li><strong>Vehicle Quantity:</strong> {{ details[0]['VehicleQuantity'] }}</li>
+                    {% endif %}
+
+                    {% if details[0]['Remarks'] is not none %}
+                    <br><br><li><strong>Remarks for Denial: </strong> {{ details[0]['Remarks']}}</li>
                     {% endif %}
                 </ul>
             {% else %}
@@ -66,7 +79,6 @@
                 {% endfor %}
             </table>
         </div>
-        
     </div>
 </body>
 </html>

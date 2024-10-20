@@ -29,7 +29,7 @@
     
             <label>Will you use your own vehicle?:</label><br>
             <input type="radio" id="ownVehicle" name="vehicle" value="Own Vehicle" onclick="toggleFields()" required> Yes
-            <input type="radio" id="mcmVehicle" name="vehicle" value="MCM Vehicle" onclick="toggleFields()" required> No<br><br>
+            <input type="radio" id="mcmVehicle" name="vehicle" value="MCM Vehicle" onclick="toggleFields()" required> No <br><br>
     
             <!-- Fields for "Yes" option (own vehicle) -->
             <div id="ownVehicleFields" style="display: none;">
@@ -67,24 +67,25 @@
             
             <!-- Fields for "No" option (MCM vehicle) -->
             <div id="mcmVehicleFields" style="display: none;">
-                <br>
-                <h3>Select Vehicle</h3>
-                <div>
-                    {% for vehicle in vehicles %}
-                    <div class="vehicle">
-                        <h2>{{ vehicle.VehicleName }}</h2>
-                        <img src="{{ vehicle.VehicleImage }}" alt="{{ vehicle.VehicleName }}" style="max-width: 100px; max-height: 100px;">
-                        <div class="controls">
-                            <button type="button" onclick="updateQuantity('{{ vehicle.VehicleName }}', -1)">-</button>
-                            <input type="number" id="{{ vehicle.VehicleName }}_quantity" value="0" min="0" max="{{ vehicle.VehicleQuantity }}" data-vehicle-name="{{ vehicle.VehicleName }}" required>
-                            <button type="button" onclick="updateQuantity('{{ vehicle.VehicleName }}', 1)">+</button>
+                <div id="vehicleSelection" style="flex: 1; margin-right: 20px;">
+                    <br>
+                    <h3>Select Vehicle</h3>
+                    <div>
+                        {% for vehicle in vehicles %}
+                        <div class="vehicle">
+                            <h2>{{ vehicle.VehicleName }}</h2>
+                            <img src="data:image/jpeg;base64,{{ vehicle.VehicleImage }}" alt="{{ vehicle.VehicleName }}" style="max-width: 300px; max-height: 300px;">
+                            <div class="controls">
+                                <button type="button" onclick="updateQuantity('{{ vehicle.VehicleName }}', -1)">-</button>
+                                <input type="number" id="{{ vehicle.VehicleName }}_quantity" value="0" min="0" max="{{ vehicle.VehicleQuantity }}" data-vehicle-name="{{ vehicle.VehicleName }}" required>
+                                <button type="button" onclick="updateQuantity('{{ vehicle.VehicleName }}', 1)">+</button>
+                            </div>
+                            <p>Available: <strong>{{ vehicle.VehicleQuantity }}</strong></p>
+                            <p>Seating Capacity: {{ vehicle.VehicleSeatingCapacity }}</p>
+                            <input type="hidden" name="vehicle_name[]" value="{{ vehicle.VehicleName }}">
+                            <input type="hidden" id="{{ vehicle.VehicleName }}_selected_quantity" name="mcmVehicleQuantity[{{ vehicle.VehicleName }}]" value="0">
                         </div>
-                        <p>Available: <strong>{{ vehicle.VehicleQuantity }}</strong></p>
-                        <p>Seating Capacity: {{ vehicle.VehicleSeatingCapacity }}</p>
-                        <input type="hidden" name="vehicle_name[]" value="{{ vehicle.VehicleName }}">
-                        <input type="hidden" id="{{ vehicle.VehicleName }}_selected_quantity" name="mcmVehicleQuantity[{{ vehicle.VehicleName }}]" value="0">
-                    </div>
-                    {% endfor %}
+                        {% endfor %}
                 </div>
                 <table id="mcmVehicleTable">
                     <tr>

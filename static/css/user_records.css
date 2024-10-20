@@ -77,8 +77,22 @@ body {
   opacity: 1;
 }
 
-/* Records Overview */
-.square {
+
+.pending-square {
+  height: fit-content;
+  width: auto;
+  padding: 30px;
+  border-radius: 2.5%;
+  background-color: #d8af57bc;
+}
+
+.pending-square table {
+  width: 100%;
+  border-collapse: collapse;
+  border-spacing: 0 10px;
+}
+
+.data-square {
   height: 1200px;
   width: auto;
   padding: 30px;
@@ -86,7 +100,21 @@ body {
   background-color: #547aacbc;
 }
 
-.square table {
+.data-square table {
+  width: 100%;
+  border-collapse: collapse;
+  border-spacing: 0 10px;
+}
+
+.denied-square {
+  height: fit-content;
+  width: auto;
+  padding: 30px;
+  border-radius: 3%;
+  background-color: #d41414bc;
+}
+
+.denied-square table {
   width: 100%;
   border-collapse: collapse;
   border-spacing: 0 10px;
@@ -135,6 +163,58 @@ body {
 }
 
 .data-row td:last-child {
+  border-top-right-radius: 7px; /* Smooth corners for the right side */
+  border-bottom-right-radius: 7px;
+}
+
+.pending-row:nth-child(odd) {
+  background-color: #ffffffa6; /* Lighter color for odd rows */
+}
+
+.pending-row:nth-child(even) {
+  background-color: #ffae177a; /* Darker color for even rows */
+}
+
+.pending-row {
+  min-height: 50px;
+  padding: 10px 20px;
+  color: rgb(0, 0, 0);
+  text-align: center;
+  border: none;
+}
+  
+.denied-row td:first-child {
+  border-top-left-radius: 7px; /* Smooth corners for the left side */
+  border-bottom-left-radius: 7px;
+}
+
+.denied-row td:last-child {
+  border-top-right-radius: 7px; /* Smooth corners for the right side */
+  border-bottom-right-radius: 7px;
+}
+
+.denied-row:nth-child(odd) {
+  background-color: #ffffffa9; /* Lighter color for odd rows */
+}
+
+.denied-row:nth-child(even) {
+  background-color: #f8000085; /* Darker color for even rows */
+}
+
+.denied-row {
+  min-height: 50px;
+  padding: 10px 20px;
+  color: rgb(0, 0, 0);
+  text-align: center;
+  border: none;
+}
+  
+.denied-row td:first-child {
+  border-top-left-radius: 7px; /* Smooth corners for the left side */
+  border-bottom-left-radius: 7px;
+}
+
+.denied-row td:last-child {
   border-top-right-radius: 7px; /* Smooth corners for the right side */
   border-bottom-right-radius: 7px;
 }

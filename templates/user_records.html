@@ -31,39 +31,110 @@
       <input class="box" placeholder="Enter Name">
       <input class="box" placeholder="Enter Start Date">
     </div>
-    <div class="square">
-      <table>
-        <thead>
-          <tr class="header-row">
-            <th>Date Filled</th>
-            <th>Requested By</th>
-            <th>Vehicle Type</th>
-            <th>Start Date</th>
-            <th>Destinations</th>
-          </tr>
-        </thead>
-        <tr style="height: 10px;"> <!-- Spacer Row -->
-          <td colspan="3"></td>
-        </tr>
-        <tbody>
-          {% for record in own_records %}
-          <tr class="data-row"
-            onclick="redirectToDetails('{{ record['StartDate'] }}', '{{ record['VehicleType'] }}', '{{ record['RequestedBy'] }}')">
-            <td>{{ record['DateFilled'] }}</td>
-            <td>{{ record['RequestedBy'] }}</td>
-            <td>{{ record['VehicleType'] }}</td>
-            <td>{{ record['StartDate'] }}</td>
-            <td>{{ record['Destinations'] }}</td>
-          </tr>
-          {% else %}
-          <tr>
-            <td colspan="4">No records found</td>
-          </tr>
-          {% endfor %}
-        </tbody>
-      </table>
-    </div>
+    {% if own_records %}
+      <!-- Table for records with Approval == 0 -->
+      <br>
+      <h3>Pending Requests</h3>
+      <div class="pending-square">
+        <table>
+          <thead>
+            <tr class="header-row">
+              <th>Date Filled</th>
+              <th>Requested By</th>
+              <th>Vehicle Type</th>
+              <th>Start Date</th>
+              <th>Destinations</th>
+            </tr>
+            <tr style="height: 10px;"> <!-- Spacer Row -->
+              <td colspan="3"></td>
+            </tr>
+          </thead>
+          <tbody>
+            {% for record in own_records %}
+              {% if record['Approval'] == 0 and record['Remarks'] is none %}
+                <tr class="pending-row"
+                  onclick="redirectToDetails('{{ record['StartDate'] }}', '{{ record['VehicleType'] }}', '{{ record['RequestedBy'] }}')">
+                  <td>{{ record['DateFilled'] }}</td>
+                  <td>{{ record['RequestedBy'] }}</td>
+                  <td>{{ record['VehicleType'] }}</td>
+                  <td>{{ record['StartDate'] }}</td>
+                  <td>{{ record['Destinations'] }}</td>
+                </tr>
+              {% endif %}
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+      <br><br><br>
+      <h3>Denied Requests</h3>
+      <div class="denied-square">
+        <table>
+          <thead>
+            <tr class="header-row">
+              <th>Date Filled</th>
+              <th>Requested By</th>
+              <th>Vehicle Type</th>
+              <th>Start Date</th>
+              <th>Destinations</th>
+            </tr>
+            <tr style="height: 10px;"> <!-- Spacer Row -->
+              <td colspan="3"></td>
+            </tr>
+          </thead>
+          <tbody>
+            {% for record in own_records %}
+              {% if record['Approval'] == 0 and record.get('Remarks') is not none %}
+                <tr class="denied-row"
+                  onclick="redirectToDetails('{{ record['StartDate'] }}', '{{ record['VehicleType'] }}', '{{ record['RequestedBy'] }}')">
+                  <td>{{ record['DateFilled'] }}</td>
+                  <td>{{ record['RequestedBy'] }}</td>
+                  <td>{{ record['VehicleType'] }}</td>
+                  <td>{{ record['StartDate'] }}</td>
+                  <td>{{ record['Destinations'] }}</td>
+                </tr>
+              {% endif %}
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+      <br><br><br>
+      <!-- Table for records with Approval == 1 -->
+      <h3>Approved Requests</h3>
+      <div class="data-square">
+        <table>
+          <thead>
+            <tr class="header-row">
+              <th>Date Filled</th>
+              <th>Requested By</th>
+              <th>Vehicle Type</th>
+              <th>Start Date</th>
+              <th>Destinations</th>
+            </tr>
+            <tr style="height: 10px;"> <!-- Spacer Row -->
+              <td colspan="3"></td>
+            </tr>
+          </thead>
+          <tbody>
+            {% for record in own_records %}
+              {% if record['Approval'] == 1 %}
+                <tr class="data-row"
+                  onclick="redirectToDetails('{{ record['StartDate'] }}', '{{ record['VehicleType'] }}', '{{ record['RequestedBy'] }}')">
+                  <td>{{ record['DateFilled'] }}</td>
+                  <td>{{ record['RequestedBy'] }}</td>
+                  <td>{{ record['VehicleType'] }}</td>
+                  <td>{{ record['StartDate'] }}</td>
+                  <td>{{ record['Destinations'] }}</td>
+                </tr>
+              {% endif %}
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    {% else %}
+      <tr>
+        <td colspan="5">No records found</td>
+      </tr>
+    {% endif %}
   </div>
 </body>
-
 </html>

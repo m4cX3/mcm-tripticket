@@ -79,11 +79,11 @@ body {
 
 /* Records Overview */
 .square {
-  height: 1200px;
+  height: fit-content;
   width: auto;
   padding: 30px;
-  border-radius: 3%;
-  background-color: #547aacbc;
+  border-radius: 2.5%;
+  background-color: #d8af57bc;
 }
 
 .square table {
@@ -118,7 +118,7 @@ body {
 }
 
 .data-row:nth-child(even) {
-  background-color: #a0afd6; /* Darker color for even rows */
+    background-color: #ffae177a; /* Darker color for even rows */
 }
 
 .data-row {
@@ -139,44 +139,9 @@ body {
   border-bottom-right-radius: 7px;
 }
 
-.cards {
-  display: flex;
-  flex-wrap: wrap; /* Allow cards to wrap if necessary */
-  gap: 20px; /* Maintain spacing between cards */
-  margin-bottom: 20px;
-}
-
-.card {
-  overflow: hidden;
-  flex: 1 1 calc(25% - 20px); /* Allow cards to grow and shrink */
-  min-width: 250px; /* Set a minimum width for better responsiveness */
-  background-color: white;
-  padding: 20px;
-  border-radius: 8px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-}
-
-.card h2 {
-  font-size: 25px; /* Adjust font size */
-  margin-bottom: 10px; /* Space below title */
-}
-
-.card p {
-  font-size: 25px; /* Adjust font size */
-  margin: 0; /* Remove margin */
-  white-space: normal; /* Allow wrapping */
-}
-
 
 /* Media Queries */
-@media screen and (max-width: 768px) {
-  .card {
-    flex: 1 1 calc(50% - 20px); /* Two cards per row on smaller screens */
-  }
-}
-
-@media screen and (max-width: 480px) {
-  .card {
-    flex: 1 1 100%; /* Full width on mobile */
-  }
+@media screen and (max-height: 450px) {
+  .sidenav { padding-top: 15px; }
+  .sidenav a { font-size: 18px; }
 }

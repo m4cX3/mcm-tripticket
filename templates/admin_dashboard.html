@@ -17,22 +17,37 @@
       <img id="mcm" src="{{ url_for('static', filename='images/mmcm small logo.png') }}" alt="MMCM Logo">
     </div>
     <a href='{{ url_for('admin_dashboard_page', username=username) }}'>Dashboard</a>
-    <a href="#">Requests</a>
+    <a href='{{ url_for('admin_requests_page', username=username) }}'>Requests</a>
     <a href='{{ url_for('admin_records_page', username=username) }}'>Records</a>
     <a href="#">Vehicles</a>
   </div>
 
   <main class="main-content">
     <header style="margin-bottom: 20px;">
-      <h1 style="color: #333;">Welcome, [first name]</h1>
+      <h1 style="color: #333;">Welcome, {{username}}</h1>
       <!-- <p style="color: #666;">Today's date: {{ current_date }}</p> -->
-      <p style="color: #666;">October 10, 2024</p>
+      <p style="color: #666;">{{ current_date }}</p>
 
     </header>
-    <div class="alert"
-      style="background-color: #ff4d4d; color: white; padding: 15px; border-radius: 8px; margin-bottom: 20px;">
-      There is 1 request awaiting approval.
-    </div>
+
+    {% set approval_count = 0 %}
+
+    {% for record in records %}
+        {% if record['Approval'] == 0 %}
+            {% set approval_count = approval_count + 1 %}
+        {% endif %}
+    {% endfor %}
+
+    {% if approval_count > 0 %}
+        <div class="alert"
+              style="background-color: #ff4d4d; color: white; padding: 15px; border-radius: 8px; margin-bottom: 20px;">
+            There {{ approval_count == 1 and "is" or "are" }} {{ approval_count }} request{{ approval_count == 1 and "" or "s" }} awaiting approval.
+        </div>
+    {% else %}
+        <div>No requests awaiting approval.</div>
+    {% endif %}
+    
+
     <div class="input-fields" style="margin-bottom: 20px;">
       <fieldset style="margin-bottom: 15px;">
         <label for="name" style="display: block; margin-bottom: 5px; color: #333;">Name:</label>
@@ -54,17 +69,17 @@
       <div class="card"
         style="flex: 1; background-color: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);">
         <h2 style="color: #333;">Total Requests</h2>
-        <p style="color: #666;">123</p>
+        <p style="color: #666;">{{record_count}}</p>
       </div>
       <div class="card"
         style="flex: 1; background-color: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);">
         <h2 style="color: #333;">Approved Requests</h2>
-        <p style="color: #666;">45</p>
+        <p style="color: #666;">{{approved_count}}</p>
       </div>
       <div class="card"
         style="flex: 1; background-color: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);">
         <h2 style="color: #333;">Denied Requests</h2>
-        <p style="color: #666;">10</p>
+        <p style="color: #666;">{{denied_count}}</p>
       </div>
     </div>
 

@@ -1,5 +1,6 @@
 from flask import Flask, render_template, request, redirect, url_for, session
-from configuration.sql_connections import insert_own_data, insert_mcm_data, show_mcm_vehicles, show_records, show_all_records, show_specific_record
+from datetime import datetime
+from configuration.sql_connections import *
 from configuration.submitform import submitform
 from configuration.login import login, get_user_id
 
@@ -38,14 +39,36 @@ def login_page():
 def admin_dashboard_page():
     
     username = session.get('username')
-    return render_template('admin_dashboard.html', username=username)
+    records = show_all_records()
+    
+    record_count = len(records)
+    approved_count = sum(1 for record in records if record['Approval'] == 1)
+    denied_count = sum(1 for record in records if record['Approval'] == 0 and record.get('Remarks') is not None)
+
+    current_date = datetime.now().strftime("%B %d, %Y") 
+
+    return render_template('admin_dashboard.html', records=records, record_count=record_count, 
+                           approved_count=approved_count, denied_count=denied_count, 
+                           current_date=current_date, username=username)
 
 @app.route('/user_dashboard', methods=['GET', 'POST'])
 def user_dashboard_page():
     
     username = session.get('username')
+    records = show_records()
+    print(records)
 
-    return render_template('user_dashboard.html', username=username)
+    record_count = len(records)
+    approved_count = sum(1 for record in records if record['Approval'] == 1)
+    denied_count = sum(1 for record in records if record['Approval'] == 0 and record.get('Remarks') is not None)
+    pending_count = sum(1 for record in records if record['Approval'] == 0)
+    current_date = datetime.now().strftime("%B %d, %Y")
+    
+    return render_template('user_dashboard.html', records=records, record_count=record_count, 
+                           approved_count=approved_count, denied_count=denied_count, 
+                           pending_count=pending_count, current_date=current_date, username=username)
+
+
 
 @app.route('/admin_records', methods=['GET'])
 def admin_records_page():
@@ -55,11 +78,22 @@ def admin_records_page():
 
     return render_template('admin_records.html', records=records, username=username)
 
+@app.route('/admin_requests', methods=['GET'])
+def admin_requests_page():
+
+    username = session.get('username')
+    records = show_all_records()
+
+    return render_template('admin_requests.html', records=records, username=username)
+
 @app.route('/admin_records_detailed', methods=['GET'])
 def admin_records_detailed_page():
+    
+    username = session.get('username')
+
     complete_details = show_specific_record()
     print(complete_details)
-    return render_template('admin_records_detailed.html', details=complete_details)
+    return render_template('admin_records_detailed.html', details=complete_details, username=username)
 
 @app.route('/user_records', methods=['GET'])
 def user_records_page():
@@ -150,5 +184,16 @@ def insert_mcm_form_to_database():
         print("UserID not found for the given username.")
         return redirect(url_for('trip_ticket_page', username=username))
 
+@app.route('/approve_request', methods=['POST'])
+def approve_form_request():
+
+    username = session.get('username')
+
+    return redirect(url_for('admin_records_page'), username=username)
+
+@app.route('/deny_request', methods=['POST'])
+def deny_form_request():
+    return deny_form()
 if __name__ == '__main__':
     app.run(debug=True)
+
