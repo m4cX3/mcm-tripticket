@@ -61,7 +61,7 @@ def user_dashboard_page():
     record_count = len(records)
     approved_count = sum(1 for record in records if record['Approval'] == 1)
     denied_count = sum(1 for record in records if record['Approval'] == 0 and record.get('Remarks') is not None)
-    pending_count = sum(1 for record in records if record['Approval'] == 0)
+    pending_count = sum(1 for record in records if record['Approval'] == 0 and record.get('Remarks') is None)
     current_date = datetime.now().strftime("%B %d, %Y")
     
     return render_template('user_dashboard.html', records=records, record_count=record_count, 
@@ -86,14 +86,28 @@ def admin_requests_page():
 
     return render_template('admin_requests.html', records=records, username=username)
 
-@app.route('/admin_records_detailed', methods=['GET'])
+@app.route('/admin_records_detailed', methods=['GET', 'POST'])
 def admin_records_detailed_page():
     
     username = session.get('username')
 
+    start_date = request.args.get('start_date')
+    vehicle_type = request.args.get('vehicle_type')
+    requested_by = request.args.get('requested_by')
+
     complete_details = show_specific_record()
     print(complete_details)
-    return render_template('admin_records_detailed.html', details=complete_details, username=username)
+    return render_template('admin_records_detailed.html', details=complete_details, username=username,
+                           start_date=start_date, vehicle_type=vehicle_type, requested_by=requested_by)
+
+@app.route('/admin_vehicles', methods=['GET'])
+def admin_vehicles_page():
+    
+    username = session.get('username')
+
+    complete_details = show_mcm_vehicles()
+    print(complete_details)
+    return render_template('admin_vehicles.html', details=complete_details, username=username)
 
 @app.route('/user_records', methods=['GET'])
 def user_records_page():
@@ -186,14 +200,12 @@ def insert_mcm_form_to_database():
 
 @app.route('/approve_request', methods=['POST'])
 def approve_form_request():
-
-    username = session.get('username')
-
-    return redirect(url_for('admin_records_page'), username=username)
+    return approve_form()
 
 @app.route('/deny_request', methods=['POST'])
 def deny_form_request():
     return deny_form()
+
 if __name__ == '__main__':
     app.run(debug=True)
 

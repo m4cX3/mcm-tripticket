@@ -34,17 +34,15 @@ function toggleFields() {
 
 function updateQuantity(vehicleName, change) {
     const quantityInput = document.getElementById(vehicleName + '_quantity');
-    let currentQuantity = parseInt(quantityInput.value) || 0;
+    const availableQuantity = parseInt(quantityInput.getAttribute('max'));
+    let newQuantity = parseInt(quantityInput.value) + change;
 
-    currentQuantity += change;
-    if (currentQuantity < 0) currentQuantity = 0;
-    if (currentQuantity > parseInt(quantityInput.max)) currentQuantity = parseInt(quantityInput.max);
-
-    quantityInput.value = currentQuantity;
-
-    // Update the corresponding hidden input for submission
-    document.getElementById(vehicleName + '_selected_quantity').value = currentQuantity;
+    if (newQuantity >= 0 && newQuantity <= availableQuantity) {
+        quantityInput.value = newQuantity;
+        document.getElementById(vehicleName + '_selected_quantity').value = newQuantity;
+    }
 }
+
 
 
 function addRow(tableId) {

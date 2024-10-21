@@ -161,24 +161,55 @@ def show_mcm_vehicles():
         connection = config_connection()
         cursor = connection.cursor(dictionary=True)
 
-        cursor.execute("SELECT VehicleID, VehicleName, VehicleQuantity, VehicleSeatingCapacity, VehicleImage FROM mcm_listvehicles")
+        # Updated SQL query
+        query = """
+            SELECT 
+                v.VehicleID, 
+                v.VehicleName, 
+                v.VehicleQuantity, 
+                v.VehicleSeatingCapacity, 
+                v.VehicleImage,
+                COUNT(CASE WHEN t.Approval = 1 OR (t.Approval = 0 AND t.Remarks IS NOT NULL) THEN vd.VehicleID END) AS UsedQuantity
+            FROM 
+                mcm_listvehicles v
+            LEFT JOIN 
+                mcm_vehicledetails vd ON v.VehicleID = vd.VehicleID
+            LEFT JOIN 
+                mcm_ticketform t ON t.FormID = vd.FormID
+            GROUP BY 
+                v.VehicleID, 
+                v.VehicleName, 
+                v.VehicleQuantity, 
+                v.VehicleSeatingCapacity, 
+                v.VehicleImage
+        """
+        cursor.execute(query)
         vehicles = cursor.fetchall()
 
-        # Convert VehicleImage from binary to base64
+        # Debug output to check fetched vehicles
+        print("Fetched Vehicles:", vehicles)  # Check the output here
+
+        # Calculate available quantity considering approval and remarks
         for vehicle in vehicles:
             if vehicle['VehicleImage']:
                 vehicle['VehicleImage'] = base64.b64encode(vehicle['VehicleImage']).decode('utf-8')
+            
+            # Start with the used quantity from count
+            used_quantity = int(vehicle['UsedQuantity'])
+            vehicle['AvailableQuantity'] = int(vehicle['VehicleQuantity']) - used_quantity
 
         return vehicles
 
     except Exception as e:
         print(f"Error retrieving vehicles: {str(e)}")
+        return []
 
     finally:
         if cursor:
             cursor.close()
         if connection:
             connection.close()
+
 
 def show_records():
     try:
@@ -267,11 +298,11 @@ def show_all_records():
 
         own_records = cursor.fetchall()
 
-        # Group records by StartDate, VehicleType, and Destinations
+        # Group records by DateFilled, StartDate, VehicleType, and RequestedBy
         grouped_records = {}
         for record in own_records:
-            # Create a unique key by combining StartDate, VehicleType, and RequestedBy
-            unique_key = (record['StartDate'], record['VehicleType'], record['RequestedBy'])
+            # Create a unique key by combining DateFilled, StartDate, VehicleType, and RequestedBy
+            unique_key = (record['DateFilled'], record['StartDate'], record['VehicleType'], record['RequestedBy'])
             if unique_key not in grouped_records:
                 grouped_records[unique_key] = {
                     'DateFilled': record['DateFilled'],
@@ -286,11 +317,12 @@ def show_all_records():
 
         # Prepare the final output
         final_records = []
-        for (start_date, vehicle_type, requested_by), details in grouped_records.items():
+        for (date_filled, start_date, vehicle_type, requested_by), details in grouped_records.items():
             first_destination = details['Destinations'][0]
             additional_count = len(details['Destinations']) - 1
             details['Destinations'] = f"{first_destination} +{additional_count}" if additional_count > 0 else first_destination
             details['StartDate'] = start_date
+            details['DateFilled'] = date_filled
             details['VehicleType'] = vehicle_type
             final_records.append(details)
 
@@ -350,43 +382,148 @@ def show_specific_record():
 
 def deny_form():
     try:
+        # Retrieve query parameters from the URL
+        start_date = request.args.get('start_date')
+        vehicle_type = request.args.get('vehicle_type')
+        requested_by = request.args.get('requested_by')
+
+        # Log the received parameters
+        print(f"Start Date: {start_date}, Vehicle Type: {vehicle_type}, Requested By: {requested_by}")
+
+        # Log if parameters are None
+        if not start_date or not vehicle_type or not requested_by:
+            return {"success": False, "error": "Missing parameters in URL."}
+
         connection = config_connection()
         cursor = connection.cursor(dictionary=True)
 
-        # Get the parameters from the request body (since it's a POST request)
-        data = request.get_json()  # Use request.get_json() for POST data
-        start_date = data.get('start_date')
-        vehicle_type = data.get('vehicle_type')
-        requested_by = data.get('requested_by')
+        # Get the request body data
+        data = request.get_json()
         remarks = data.get('remarks')
-        
-        if vehicle_type == 'Own Vehicle':
-            # Update the remarks for 'Own Vehicle'
-            cursor.execute("""
-                UPDATE own_ticketform t
-                JOIN own_traveldetails d ON t.FormID = d.FormID
-                SET t.Remarks = %s
-                WHERE d.StartDate = %s AND t.RequestedBy = %s
-            """, (remarks, start_date, requested_by))
 
-        else:  # Assuming vehicle_type is 'MCM Vehicle'
-            # Update the remarks for 'MCM Vehicle'
+        # Log received data
+        print(f"Data received: {data}")
+
+        if vehicle_type == 'Own Vehicle':
+            # Step 1: First, get the FormIDs that match the conditions
             cursor.execute("""
-                UPDATE mcm_ticketform m
+                SELECT t.FormID FROM own_ticketform t
+                JOIN own_traveldetails d ON t.FormID = d.FormID
+                WHERE d.StartDate = %s AND t.RequestedBy = %s
+            """, (start_date, requested_by))
+            form_ids = cursor.fetchall()
+
+            # Step 2: Update only the matching FormIDs in the 'own_ticketform'
+            if form_ids:
+                form_ids = [form['FormID'] for form in form_ids]  # Extract FormID values
+                cursor.execute(f"""
+                    UPDATE own_ticketform 
+                    SET Remarks = %s 
+                    WHERE FormID IN ({', '.join(['%s'] * len(form_ids))})
+                """, [remarks] + form_ids)
+        else:  # Assuming vehicle_type is 'MCM Vehicle'
+            cursor.execute("""
+                SELECT m.FormID FROM mcm_ticketform m
                 JOIN mcm_traveldetails md ON m.FormID = md.FormID
-                SET md.Remarks = %s
                 WHERE md.StartDate = %s AND m.RequestedBy = %s
-            """, (remarks, start_date, requested_by))
-        
-        # Commit the changes
+            """, (start_date, requested_by))
+            form_ids = cursor.fetchall()
+
+            if form_ids:
+                form_ids = [form['FormID'] for form in form_ids]
+                cursor.execute(f"""
+                    UPDATE mcm_ticketform 
+                    SET Remarks = %s 
+                    WHERE FormID IN ({', '.join(['%s'] * len(form_ids))})
+                """, [remarks] + form_ids)
+
         connection.commit()
-        
-        return {"success": True}  # Return a success response
-    
+        affected_rows = cursor.rowcount
+        print(f"Affected rows: {affected_rows}")
+
+        if affected_rows > 0:
+            return {"success": True}
+        else:
+            return {"success": False, "error": "No matching records found."}
+
     except Exception as e:
         print(f"Error denying the request: {str(e)}")
-        return {"success": False, "error": str(e)}  # Return error response
-    
+        return {"success": False, "error": str(e)}
+
+    finally:
+        if cursor:
+            cursor.close()
+        if connection:
+            connection.close()
+
+
+def approve_form():
+    try:
+        # Retrieve query parameters from the URL
+        start_date = request.args.get('start_date')
+        vehicle_type = request.args.get('vehicle_type')
+        requested_by = request.args.get('requested_by')
+
+        # Log the received parameters
+        print(f"Start Date: {start_date}, Vehicle Type: {vehicle_type}, Requested By: {requested_by}")
+
+        # Log if parameters are None
+        if not start_date or not vehicle_type or not requested_by:
+            return {"success": False, "error": "Missing parameters in URL."}
+
+        connection = config_connection()
+        cursor = connection.cursor(dictionary=True)
+
+        # Get the request body data (username if needed)
+        data = request.get_json()
+        username = data.get('username')  # You can log this if needed
+
+        if vehicle_type == 'Own Vehicle':
+            # Step 1: First, get the FormIDs that match the conditions
+            cursor.execute("""
+                SELECT t.FormID FROM own_ticketform t
+                JOIN own_traveldetails d ON t.FormID = d.FormID
+                WHERE d.StartDate = %s AND t.RequestedBy = %s
+            """, (start_date, requested_by))
+            form_ids = cursor.fetchall()
+
+            # Step 2: Update only the matching FormIDs in the 'own_ticketform'
+            if form_ids:
+                form_ids = [form['FormID'] for form in form_ids]  # Extract FormID values
+                cursor.execute(f"""
+                    UPDATE own_ticketform 
+                    SET Approval = 1 
+                    WHERE FormID IN ({', '.join(['%s'] * len(form_ids))})
+                """, form_ids)
+        else:  # Assuming vehicle_type is 'MCM Vehicle'
+            cursor.execute("""
+                SELECT m.FormID FROM mcm_ticketform m
+                JOIN mcm_traveldetails md ON m.FormID = md.FormID
+                WHERE md.StartDate = %s AND m.RequestedBy = %s
+            """, (start_date, requested_by))
+            form_ids = cursor.fetchall()
+
+            if form_ids:
+                form_ids = [form['FormID'] for form in form_ids]
+                cursor.execute(f"""
+                    UPDATE mcm_ticketform 
+                    SET Approval = 1 
+                    WHERE FormID IN ({', '.join(['%s'] * len(form_ids))})
+                """, form_ids)
+
+        connection.commit()
+        affected_rows = cursor.rowcount
+        print(f"Affected rows: {affected_rows}")
+
+        if affected_rows > 0:
+            return {"success": True}
+        else:
+            return {"success": False, "error": "No matching records found."}
+
+    except Exception as e:
+        print(f"Error approving the request: {str(e)}")
+        return {"success": False, "error": str(e)}
+
     finally:
         if cursor:
             cursor.close()

@@ -22,7 +22,9 @@
     </div>
     <a href='{{ url_for('user_dashboard_page', username=username) }}'>Dashboard</a>
     <a href='{{ url_for('user_records_page', username=username) }}'>Records</a>
-    <button class="add-request-button" onclick="location.href='{{ url_for('terms_and_conditions_page', username=username) }}'">Add Request</button>
+    <a href='{{ url_for('terms_and_conditions_page', username=username) }}'">Add Request</a>
+    <br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>
+    <a href='{{ url_for('login_page') }}'>Log Out</a>
   </div>
   <div class="main-content">
     <h2>Records Entry</h2>

@@ -18,8 +18,9 @@
     </div>
     <a href='{{ url_for('user_dashboard_page', username=username) }}'>Dashboard</a>
     <a href='{{ url_for('user_records_page', username=username) }}'>Records</a>
-    <button class="add-request-button" onclick="location.href='{{ url_for('terms_and_conditions_page', username=username) }}'">Add Request</button>
-    <button class="logout-button" onclick="location.href='{{ url_for('login_page') }}'">Log Out</button>
+    <a href='{{ url_for('terms_and_conditions_page', username=username) }}'">Add Request</a>
+    <br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>
+    <a href='{{ url_for('login_page') }}'>Log Out</a>
 </div>
 
 
@@ -30,12 +31,21 @@
       <p style="color: #666;">{{current_date}}</p>
 
     </header>
-    <div class="alert"
-      style="background-color: #ff4d4d; color: white; padding: 15px; border-radius: 8px; margin-bottom: 20px;">
-      You have one pending request.
-    </div>
-    <div class="input-fields" style="margin-bottom: 20px;">
+    {% set approval_count = 0 %}
 
+    {% for record in records %}
+        {% if record['Approval'] == 0 and record['Remarks'] is not none%}
+            {% set approval_count = approval_count + 1 %}
+        {% endif %}
+    {% endfor %}
+
+    {% if approval_count > 0 %}
+      <div class="alert"
+        style="background-color: #ff4d4d; color: white; padding: 15px; border-radius: 8px; margin-bottom: 20px;">
+        You have {{approval_count == 1 and "is" or "are"}} pending request{{ approval_count == 1 and "" or "s" }}.
+      </div>
+      <div class="input-fields" style="margin-bottom: 20px;">
+    {% endif %}
       <fieldset style="margin-bottom: 15px;">
         <label for="start-date" style="display: block; margin-bottom: 5px; color: #333;">Start Date:</label>
         <input id="start-date" class="box" placeholder="Enter Start Date"

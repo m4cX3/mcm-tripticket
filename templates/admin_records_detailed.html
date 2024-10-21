@@ -7,20 +7,20 @@
     <link href='https://fonts.googleapis.com/css?family=Poppins' rel='stylesheet'>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/admin_records_detailed.css') }}" type="text/css">
     <script>
-        // Function to deny the request and collect remarks
         function denyRequest(username, travelStartDate, vehicleType, requestedBy) {
-            var remarks = prompt("Enter remarks for denial:"); // Prompt user for remarks
+            var remarks = prompt("Enter remarks for denial:");
             if (remarks === null) {
-                // User clicked "Cancel"
-                return;
+                return; // User clicked "Cancel"
             }
             if (remarks.trim() === '') {
                 alert('Please enter remarks.');
                 return;
             }
-    
-            // Send data to the backend via POST request
-            fetch('/deny_request', {
+        
+            // Construct the URL with parameters
+            const url = `/deny_request?start_date=${encodeURIComponent(travelStartDate)}&vehicle_type=${encodeURIComponent(vehicleType)}&requested_by=${encodeURIComponent(requestedBy)}`;
+        
+            fetch(url, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
@@ -28,23 +28,70 @@
                 body: JSON.stringify({
                     'username': username,
                     'remarks': remarks,
-                    'start_date': travelStartDate,  // Include start date
-                    'vehicle_type': vehicleType,    // Include vehicle type
-                    'requested_by': requestedBy     // Include the requester
                 })
             })
             .then(response => response.json())
             .then(data => {
                 if (data.success) {
-                    alert('Request Denied');
-                    window.location.href = '/admin_dashboard?username=' + username;  // Redirect to requests page after denying
+                    alert('Request has been Denied');
+                    window.location.href = '/admin_records?username=' + username;  // Redirect to requests page after denying
                 } else {
                     alert('Error denying request');
                 }
             })
             .catch(error => console.error('Error:', error));
         }
-    </script>    
+        
+        // Extract URL parameters
+        function getUrlParams() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const startDate = urlParams.get('start_date');
+            const vehicleType = urlParams.get('vehicle_type');
+            const requestedBy = urlParams.get('requested_by');
+            
+            console.log(startDate, vehicleType, requestedBy); // Debugging to check values
+            
+            return { startDate, vehicleType, requestedBy };
+        }
+
+        // Event handler for the deny button
+        function onDenyButtonClick(username) {
+            const { startDate, vehicleType, requestedBy } = getUrlParams();
+            denyRequest(username, startDate, vehicleType, requestedBy);
+        }
+
+        function approveRequest(username, travelStartDate, vehicleType, requestedBy) {
+            // Construct the URL with parameters
+            const url = `/approve_request?start_date=${encodeURIComponent(travelStartDate)}&vehicle_type=${encodeURIComponent(vehicleType)}&requested_by=${encodeURIComponent(requestedBy)}`;
+        
+            fetch(url, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    'username': username
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    alert('Request has been Approved');
+                    window.location.href = '/admin_records?username=' + username;  // Redirect to requests page after approval
+                } else {
+                    alert('Error approving request: ' + data.error);
+                }
+            })
+            .catch(error => console.error('Error:', error));
+        }
+        
+        // Event handler for the approve button
+        function onApproveButtonClick(username) {
+            const { startDate, vehicleType, requestedBy } = getUrlParams();
+            approveRequest(username, startDate, vehicleType, requestedBy);
+        }
+        
+    </script>
 </head>
 <body>
     <!-- Sidebar -->
@@ -55,7 +102,9 @@
         <a href='{{ url_for('admin_dashboard_page', username=username) }}'>Dashboard</a>
         <a href='{{ url_for('admin_requests_page', username=username) }}'>Requests</a>
         <a href='{{ url_for('admin_records_page', username=username) }}'>Records</a>
-        <a href="#">Vehicles</a>
+        <a href='{{ url_for('admin_vehicles_page', username=username) }}'>Vehicles</a>
+        <br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>
+        <a href='{{ url_for('login_page') }}'>Log Out</a>
     </div>
 
     <!-- Main content -->
@@ -83,12 +132,13 @@
                 <li><strong>Vehicle Seating Capcity:</strong> {{ details[0]['SeatingCapacity'] }}</li>
                 <li><strong>Vehicle Plate Number:</strong> {{ details[0]['PlateNumber'] }}</li>
                 {% if details[0]['Remarks'] is not none %}
+                <br><br>
                 <li><strong>Remarks for Denial: </strong> {{ details[0]['Remarks']}}</li>
                 {% endif %}
             </ul>
         </div>
         <div class="details-box">
-            <h3>Travel Details:</h3>
+            <h3 style="color: white">Travel Details:</h3>
             <table>
                 <tr>
                     <th>Start Date</th>
@@ -106,10 +156,10 @@
                 {% endfor %}
             </table>
         </div>
-        {% if details[0]['Approval'] == 0 %}
+        {% if details[0]['Approval'] == 0 and details[0]['Remarks'] is none %}
         <div class="button-container">
-            <input type="button" id="deny" name="deny" value="Deny" class="deny-button" onclick="denyRequest('{{ username }}')">
-            <input type="submit" id="submit" name="submit" value="Approve" class="approve-button">
+            <input type="button" id="deny" name="deny" value="Deny" class="deny-button" onclick="onDenyButtonClick('{{ username }}')">
+            <input type="button" id="approve" name="approve" value="Approve" class="approve-button" onclick="onApproveButtonClick('{{ username }}')">
         </div>
         {% endif %}
     </div>

@@ -92,6 +92,20 @@ body {
   border-spacing: 0 10px;
 }
 
+.denied-square {
+  height: fit-content;
+  width: auto;
+  padding: 30px;
+  border-radius: 3%;
+  background-color: #d41414bc;
+}
+
+.denied-square table {
+  width: 100%;
+  border-collapse: collapse;
+  border-spacing: 0 10px;
+}
+
 .header-row {
   background-color: #ffffffb9; /* Background color of the header row */
 }
@@ -139,6 +153,41 @@ body {
   border-bottom-right-radius: 7px;
 }
 
+.denied-row td:first-child {
+  border-top-left-radius: 7px; /* Smooth corners for the left side */
+  border-bottom-left-radius: 7px;
+}
+
+.denied-row td:last-child {
+  border-top-right-radius: 7px; /* Smooth corners for the right side */
+  border-bottom-right-radius: 7px;
+}
+
+.denied-row:nth-child(odd) {
+  background-color: #ffffffa9; /* Lighter color for odd rows */
+}
+
+.denied-row:nth-child(even) {
+  background-color: #f8000085; /* Darker color for even rows */
+}
+
+.denied-row {
+  min-height: 50px;
+  padding: 10px 20px;
+  color: rgb(0, 0, 0);
+  text-align: center;
+  border: none;
+}
+  
+.denied-row td:first-child {
+  border-top-left-radius: 7px; /* Smooth corners for the left side */
+  border-bottom-left-radius: 7px;
+}
+
+.denied-row td:last-child {
+  border-top-right-radius: 7px; /* Smooth corners for the right side */
+  border-bottom-right-radius: 7px;
+}
 
 /* Media Queries */
 @media screen and (max-height: 450px) {

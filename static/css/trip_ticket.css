@@ -73,6 +73,7 @@ input[type="text"]::placeholder {
 
 input[type="radio"] {
     margin-right: 10px;
+    color: white
 }
 
 input[type="radio"] + label {

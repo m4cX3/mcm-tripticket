@@ -27,7 +27,7 @@
             <label for="purpose">Purpose of Trip:</label>
             <input type="text" id="purpose" name="purpose"><br><br>
     
-            <label>Will you use your own vehicle?:</label><br>
+            <label for="radio-label">Will you use your own vehicle?:</label><br>
             <input type="radio" id="ownVehicle" name="vehicle" value="Own Vehicle" onclick="toggleFields()" required> Yes
             <input type="radio" id="mcmVehicle" name="vehicle" value="MCM Vehicle" onclick="toggleFields()" required> No <br><br>
     
@@ -72,6 +72,7 @@
                     <h3>Select Vehicle</h3>
                     <div>
                         {% for vehicle in vehicles %}
+                        {% if vehicle.AvailableQuantity != 0 %}
                         <div class="vehicle">
                             <h2>{{ vehicle.VehicleName }}</h2>
                             <img src="data:image/jpeg;base64,{{ vehicle.VehicleImage }}" alt="{{ vehicle.VehicleName }}" style="max-width: 300px; max-height: 300px;">
@@ -80,11 +81,12 @@
                                 <input type="number" id="{{ vehicle.VehicleName }}_quantity" value="0" min="0" max="{{ vehicle.VehicleQuantity }}" data-vehicle-name="{{ vehicle.VehicleName }}" required>
                                 <button type="button" onclick="updateQuantity('{{ vehicle.VehicleName }}', 1)">+</button>
                             </div>
-                            <p>Available: <strong>{{ vehicle.VehicleQuantity }}</strong></p>
+                            <p>Available: <strong>{{ vehicle.AvailableQuantity }}</strong></p>
                             <p>Seating Capacity: {{ vehicle.VehicleSeatingCapacity }}</p>
                             <input type="hidden" name="vehicle_name[]" value="{{ vehicle.VehicleName }}">
                             <input type="hidden" id="{{ vehicle.VehicleName }}_selected_quantity" name="mcmVehicleQuantity[{{ vehicle.VehicleName }}]" value="0">
                         </div>
+                        {% endif %}
                         {% endfor %}
                 </div>
                 <table id="mcmVehicleTable">

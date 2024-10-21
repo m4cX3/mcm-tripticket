@@ -19,7 +19,9 @@
     <a href='{{ url_for('admin_dashboard_page', username=username) }}'>Dashboard</a>
     <a href='{{ url_for('admin_requests_page', username=username) }}'>Requests</a>
     <a href='{{ url_for('admin_records_page', username=username) }}'>Records</a>
-    <a href="#">Vehicles</a>
+    <a href='{{ url_for('admin_vehicles_page', username=username) }}'>Vehicles</a>
+    <br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>
+    <a href='{{ url_for('login_page') }}'>Log Out</a>
   </div>
 
   <main class="main-content">
@@ -30,23 +32,19 @@
 
     </header>
 
-    {% set approval_count = 0 %}
-
-    {% for record in records %}
-        {% if record['Approval'] == 0 %}
-            {% set approval_count = approval_count + 1 %}
-        {% endif %}
-    {% endfor %}
-
+    {% set approval_count = records 
+      | selectattr('Approval', 'equalto', 0) 
+      | selectattr('Remarks', 'none') 
+      | list | length %}
+  
     {% if approval_count > 0 %}
         <div class="alert"
-              style="background-color: #ff4d4d; color: white; padding: 15px; border-radius: 8px; margin-bottom: 20px;">
+            style="background-color: #ff4d4d; color: white; padding: 15px; border-radius: 8px; margin-bottom: 20px;">
             There {{ approval_count == 1 and "is" or "are" }} {{ approval_count }} request{{ approval_count == 1 and "" or "s" }} awaiting approval.
         </div>
     {% else %}
         <div>No requests awaiting approval.</div>
     {% endif %}
-    
 
     <div class="input-fields" style="margin-bottom: 20px;">
       <fieldset style="margin-bottom: 15px;">

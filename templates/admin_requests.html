@@ -21,17 +21,12 @@
     <a href='{{ url_for('admin_dashboard_page', username=username) }}'>Dashboard</a>
     <a href="#">Requests</a>
     <a href='{{ url_for('admin_records_page', username=username) }}'>Records</a>
-    <a href="#">Vehicles</a>
+    <a href='{{ url_for('admin_vehicles_page', username=username) }}'>Vehicles</a>
+    <br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>
+    <a href='{{ url_for('login_page') }}'>Log Out</a>
   </div>
 
     <div class="main-content">
-        <h2>Records Entry</h2>
-        <div class="input-fields">
-            <input class="box" placeholder="Enter Date Filled">
-            <input class="box" placeholder="Enter Name">
-            <input class="box" placeholder="Enter Start Date">
-        </div>
-        <br>
         <h3>Pending Requests</h3>
         <div class="square">
             <table>
@@ -49,7 +44,7 @@
               </tr>
               <tbody>
                 {% for record in records %}
-                  {% if record['Approval'] == 0 %}
+                  {% if record['Approval'] == 0 and record['Remarks'] is none %}
                     <tr class="data-row"
                       onclick="redirectToDetails('{{ record['StartDate'] }}', '{{ record['VehicleType'] }}', '{{ record['RequestedBy'] }}')">
                       <td>{{ record['DateFilled'] }}</td>
