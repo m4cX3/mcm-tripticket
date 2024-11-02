@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, redirect, url_for, session
+from flask import Flask, render_template, request, redirect, url_for, session, json
 from datetime import datetime
 from configuration.sql_connections import *
 from configuration.submitform import submitform
@@ -9,27 +9,9 @@ app.secret_key = 'your_secret_key'
 
 @app.route('/')
 def home_page():
-    data = [
-        {
-          'label': "Toyota Hiace Granda",
-          'quantity': 2,
-          'status': "Available",
-          'image': "/static/images/vehicle/toyota-hiace-grandia.jpg"
-        },
-        {
-          'label': "Yellow Bus",
-          'quantity': 3,
-          'status': "Not Available",
-          'image': "/static/images/vehicle/yellow-bus.jpg"
-        },
-        {
-          'label': "Toyota Hilux (Cabin)",
-          'quantity': 1,
-          'status': "Available",
-          "image": "/static/images/vehicle/toyota-hilux(cabin).webp"
-        },
-      ]
-    return render_template('home.html', data=data)
+    details = show_mcm_vehicles()
+    return render_template('home.html', details=details)
+
 @app.route('/login', methods=['GET', 'POST'])
 def login_page():
     
@@ -39,7 +21,37 @@ def login_page():
 def admin_dashboard_page():
     
     username = session.get('username')
-    records = show_all_records()
+    records = show_all_records()  # Retrieve all records initially
+    
+    # Initialize variables with default values
+    name_filter = ""
+    start_date = None
+    end_date = None
+
+    if request.method == 'POST':
+        # Get user input from the form
+        name_filter = request.form.get('name', '').strip()  # Stripping leading/trailing whitespace
+        start_date_filter = request.form.get('start_date')
+        end_date_filter = request.form.get('end_date')
+
+        # Convert date strings to date objects if provided
+        if start_date_filter:
+            start_date = datetime.strptime(start_date_filter, '%Y-%m-%d').date()
+        if end_date_filter:
+            end_date = datetime.strptime(end_date_filter, '%Y-%m-%d').date()
+
+        # Filtering logic
+        if name_filter:
+            # Partial match (case insensitive)
+            records = [record for record in records if name_filter.lower() in record['RequestedBy'].lower()]
+
+        if start_date and end_date:
+            records = [record for record in records if start_date <= record['DateFilled'] <= end_date]
+        elif start_date:
+            records = [record for record in records if record['DateFilled'] >= start_date]
+        elif end_date:
+            records = [record for record in records if record['DateFilled'] <= end_date]
+
     
     record_count = len(records)
     approved_count = sum(1 for record in records if record['Approval'] == 1)
@@ -55,28 +67,85 @@ def admin_dashboard_page():
 def user_dashboard_page():
     
     username = session.get('username')
-    records = show_records()
-    print(records)
+    own_records = show_records()
 
-    record_count = len(records)
-    approved_count = sum(1 for record in records if record['Approval'] == 1)
-    denied_count = sum(1 for record in records if record['Approval'] == 0 and record.get('Remarks') is not None)
-    pending_count = sum(1 for record in records if record['Approval'] == 0 and record.get('Remarks') is None)
+    # Initialize variables with default values
+    name_filter = ""
+    start_date = None
+    end_date = None
+
+    if request.method == 'POST':
+        # Get user input from the form
+        name_filter = request.form.get('name', '').strip()  # Stripping leading/trailing whitespace
+        start_date_filter = request.form.get('start_date')
+        end_date_filter = request.form.get('end_date')
+
+        # Convert date strings to date objects if provided
+        if start_date_filter:
+            start_date = datetime.strptime(start_date_filter, '%Y-%m-%d').date()
+        if end_date_filter:
+            end_date = datetime.strptime(end_date_filter, '%Y-%m-%d').date()
+
+        # Filtering logic
+        if name_filter:
+            # Partial match (case insensitive)
+            own_records = [record for record in own_records if name_filter.lower() in record['RequestedBy'].lower()]
+
+        if start_date and end_date:
+            own_records = [record for record in own_records if start_date <= record['DateFilled'] <= end_date]
+        elif start_date:
+            own_records = [record for record in own_records if record['DateFilled'] >= start_date]
+        elif end_date:
+            own_records = [record for record in own_records if record['DateFilled'] <= end_date]
+
+    record_count = len(own_records)
+    approved_count = sum(1 for record in own_records if record['Approval'] == 1)
+    denied_count = sum(1 for record in own_records if record['Approval'] == 0 and record.get('Remarks') is not None)
+    pending_count = sum(1 for record in own_records if record['Approval'] == 0 and record.get('Remarks') is None)
     current_date = datetime.now().strftime("%B %d, %Y")
     
-    return render_template('user_dashboard.html', records=records, record_count=record_count, 
+    return render_template('user_dashboard.html', own_records=own_records, record_count=record_count, 
                            approved_count=approved_count, denied_count=denied_count, 
-                           pending_count=pending_count, current_date=current_date, username=username)
+                           pending_count=pending_count, current_date=current_date, 
+                           username=username, name=name_filter, start_date=start_date, end_date=end_date)
 
 
 
-@app.route('/admin_records', methods=['GET'])
+@app.route('/admin_records', methods=['GET', 'POST'])
 def admin_records_page():
-
     username = session.get('username')
     records = show_all_records()
 
-    return render_template('admin_records.html', records=records, username=username)
+    # Initialize variables with default values
+    name_filter = ""
+    start_date = None
+    end_date = None
+
+    if request.method == 'POST':
+        # Get user input from the form
+        name_filter = request.form.get('name', '').strip()  # Stripping leading/trailing whitespace
+        start_date_filter = request.form.get('start_date')
+        end_date_filter = request.form.get('end_date')
+
+        # Convert date strings to date objects if provided
+        if start_date_filter:
+            start_date = datetime.strptime(start_date_filter, '%Y-%m-%d').date()
+        if end_date_filter:
+            end_date = datetime.strptime(end_date_filter, '%Y-%m-%d').date()
+
+        # Filtering logic
+        if name_filter:
+            # Partial match (case insensitive)
+            records = [record for record in records if name_filter.lower() in record['RequestedBy'].lower()]
+
+        if start_date and end_date:
+            records = [record for record in records if start_date <= record['DateFilled'] <= end_date]
+        elif start_date:
+            records = [record for record in records if record['DateFilled'] >= start_date]
+        elif end_date:
+            records = [record for record in records if record['DateFilled'] <= end_date]
+
+    return render_template('admin_records.html', records=records, username=username, name=name_filter, start_date=start_date, end_date=end_date)
 
 @app.route('/admin_requests', methods=['GET'])
 def admin_requests_page():
@@ -109,13 +178,41 @@ def admin_vehicles_page():
     print(complete_details)
     return render_template('admin_vehicles.html', details=complete_details, username=username)
 
-@app.route('/user_records', methods=['GET'])
+@app.route('/user_records', methods=['GET', 'POST'])
 def user_records_page():
-    
     username = session.get('username')
     own_records = show_records()
     
-    return render_template('user_records.html', own_records=own_records, username=username)
+    # Initialize variables with default values
+    name_filter = ""
+    start_date = None
+    end_date = None
+
+    if request.method == 'POST':
+        # Get user input from the form
+        name_filter = request.form.get('name', '').strip()  # Stripping leading/trailing whitespace
+        start_date_filter = request.form.get('start_date')
+        end_date_filter = request.form.get('end_date')
+
+        # Convert date strings to date objects if provided
+        if start_date_filter:
+            start_date = datetime.strptime(start_date_filter, '%Y-%m-%d').date()
+        if end_date_filter:
+            end_date = datetime.strptime(end_date_filter, '%Y-%m-%d').date()
+
+        # Filtering logic
+        if name_filter:
+            # Partial match (case insensitive)
+            own_records = [record for record in own_records if name_filter.lower() in record['RequestedBy'].lower()]
+
+        if start_date and end_date:
+            own_records = [record for record in own_records if start_date <= record['DateFilled'] <= end_date]
+        elif start_date:
+            own_records = [record for record in own_records if record['DateFilled'] >= start_date]
+        elif end_date:
+            own_records = [record for record in own_records if record['DateFilled'] <= end_date]
+
+    return render_template('user_records.html', own_records=own_records, username=username, name=name_filter, start_date=start_date, end_date=end_date)
 
 @app.route('/user_records_detailed', methods=['GET'])
 def user_records_detailed_page():
@@ -205,6 +302,7 @@ def approve_form_request():
 @app.route('/deny_request', methods=['POST'])
 def deny_form_request():
     return deny_form()
+
 
 if __name__ == '__main__':
     app.run(debug=True)

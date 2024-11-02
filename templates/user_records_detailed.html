@@ -23,63 +23,67 @@
 
     <!-- Main content -->
     <div class="main-content">
-        {% if details[0]['Approval'] == 0 and details[0]['Remarks'] is none %}
-        <h3>This is a pending request</h3>
-        {% endif %}
-        {% if details[0]['Approval'] == 0 and details[0]['Remarks'] is not none %}
-        <h3>Your request has been denied</h3>
-        {% endif %}
-        {% if details[0]['Approval'] == 1 %}
-        <h3>Request has been accepted</h3>
-        {% endif %}
-        <!-- Summary box -->
-        <div class="summary-box">
-            {% if details %}
-                <ul>
-                    <li><strong>Date Filled:</strong> {{ details[0]['DateFilled'] }}</li>
-                    <li><strong>Requested By:</strong> {{ details[0]['RequestedBy'] }}</li>
-                    <li><strong>Department:</strong> {{ details[0]['Department'] }}</li>
-                    <li><strong>Purpose of Trip:</strong> {{ details[0]['Purpose_Of_Trip'] }}</li>
-                    <li><strong>Vehicle Type:</strong> {{ details[0]['VehicleType'] }}</li>
-                    <br>
-                    
-                    {% if details[0]['VehicleType'] == "Own Vehicle" %}
-                        <li><strong>Vehicle Name:</strong> {{ details[0]['VehicleName'] }}</li>
-                        <li><strong>Vehicle Classification:</strong> {{ details[0]['Classification'] }}</li>
-                        <li><strong>Vehicle Seating Capacity:</strong> {{ details[0]['SeatingCapacity'] }}</li>
-                        <li><strong>Vehicle Plate Number:</strong> {{ details[0]['PlateNumber'] }}</li>
-                    {% elif details[0]['VehicleType'] == "MCM Vehicle" %}
-                        <li><strong>Vehicle Name:</strong> {{ details[0]['VehicleName'] }}</li>
-                        <li><strong>Vehicle Quantity:</strong> {{ details[0]['VehicleQuantity'] }}</li>
-                    {% endif %}
-
-                    {% if details[0]['Remarks'] is not none %}
-                    <br><br><li><strong>Remarks for Denial: </strong> {{ details[0]['Remarks']}}</li>
-                    {% endif %}
-                </ul>
-            {% else %}
-                <p>No vehicle details available for the selected criteria.</p>
+        {% if details %}
+            {% if details[0]['Approval'] == 0 and details[0]['Remarks'] is none %}
+            <h3>This is a pending request</h3>
             {% endif %}
-        </div>
-        
-        <div class="details-box">
-            <h3 style="color: white">Travel Details:</h3>
-            <table>
-                <tr>
-                    <th>Start Date</th>
-                    <th>Start Time</th>
-                    <th>Estimated Return</th>
-                    <th>Destinations</th>
-                </tr>
-                {% for travel in details %}
+            {% if details[0]['Approval'] == 0 and details[0]['Remarks'] is not none %}
+            <h3>Your request has been denied</h3>
+            {% endif %}
+            {% if details[0]['Approval'] == 1 %}
+            <h3>Request has been accepted</h3>
+            {% endif %}
+            <!-- Summary box -->
+            <div class="summary-box">
+                {% if details %}
+                    <ul>
+                        <li><strong>Date Filled:</strong> {{ details[0]['DateFilled'] }}</li>
+                        <li><strong>Requested By:</strong> {{ details[0]['RequestedBy'] }}</li>
+                        <li><strong>Department:</strong> {{ details[0]['Department'] }}</li>
+                        <li><strong>Purpose of Trip:</strong> {{ details[0]['Purpose_Of_Trip'] }}</li>
+                        <li><strong>Vehicle Type:</strong> {{ details[0]['VehicleType'] }}</li>
+                        <br>
+                        
+                        {% if details[0]['VehicleType'] == "Own Vehicle" %}
+                            <li><strong>Vehicle Name:</strong> {{ details[0]['VehicleName'] }}</li>
+                            <li><strong>Vehicle Classification:</strong> {{ details[0]['Classification'] }}</li>
+                            <li><strong>Vehicle Seating Capacity:</strong> {{ details[0]['SeatingCapacity'] }}</li>
+                            <li><strong>Vehicle Plate Number:</strong> {{ details[0]['PlateNumber'] }}</li>
+                        {% elif details[0]['VehicleType'] == "MCM Vehicle" %}
+                            <li><strong>Vehicle Name:</strong> {{ details[0]['VehicleName'] }}</li>
+                            <li><strong>Vehicle Quantity:</strong> {{ details[0]['VehicleQuantity'] }}</li>
+                        {% endif %}
+
+                        {% if details[0]['Remarks'] is not none %}
+                        <br><br><li><strong>Remarks for Denial: </strong> {{ details[0]['Remarks']}}</li>
+                        {% endif %}
+                    </ul>
+                {% else %}
+                    <p>No vehicle details available for the selected criteria.</p>
+                {% endif %}
+            </div>
+            
+            <div class="details-box">
+                <h3 style="color: white">Travel Details:</h3>
+                <table>
                     <tr>
-                        <td>{{ travel.StartDate }}</td>
-                        <td>{{ travel.StartTime }}</td>
-                        <td>{{ travel.EstimatedReturns }}</td>
-                        <td>{{ travel.Destinations }}</td>
+                        <th>Start Date</th>
+                        <th>Start Time</th>
+                        <th>Estimated Return</th>
+                        <th>Destinations</th>
                     </tr>
-                {% endfor %}
-            </table>
+                    {% for travel in details %}
+                        <tr>
+                            <td>{{ travel.StartDate }}</td>
+                            <td>{{ travel.StartTime }}</td>
+                            <td>{{ travel.EstimatedReturns }}</td>
+                            <td>{{ travel.Destinations }}</td>
+                        </tr>
+                    {% endfor %}
+                </table>
+        {%else%}
+            <p>No record found</p>
+        {%endif%}
         </div>
     </div>
 </body>

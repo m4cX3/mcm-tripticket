@@ -1,8 +1,6 @@
 function toggleFields() {
     var ownVehicleFields = document.getElementById("ownVehicleFields");
     var mcmVehicleFields = document.getElementById("mcmVehicleFields");
-    var ownVehicleTable = document.getElementById("ownVehicleTable");
-    var mcmVehicleTable = document.getElementById("mcmVehicleTable");
     var ownVehicleRadio = document.getElementById("ownVehicle");
     var mcmVehicleRadio = document.getElementById("mcmVehicle");
 
@@ -19,17 +17,28 @@ function toggleFields() {
             }
         }
     }
-    
+
     // Toggle visibility based on the selected radio button
     if (ownVehicleRadio.checked) {
         ownVehicleFields.style.display = "block";
         mcmVehicleFields.style.display = "none";
         clearTableRows(mcmVehicleTable); // Clear MCM vehicle table
+        setRequiredFields(ownVehicleFields, true); // Set own vehicle fields as required
+        setRequiredFields(mcmVehicleFields, false); // Remove requirement from MCM fields
     } else if (mcmVehicleRadio.checked) {
         mcmVehicleFields.style.display = "block";
         ownVehicleFields.style.display = "none";
         clearTableRows(ownVehicleTable); // Clear Own vehicle table
+        setRequiredFields(mcmVehicleFields, true); // Set MCM fields as required
+        setRequiredFields(ownVehicleFields, false); // Remove requirement from own vehicle fields
     }
+}
+
+function setRequiredFields(container, isRequired) {
+    const inputs = container.querySelectorAll('input[type="text"], input[type="date"], input[type="number"], input[type="radio"]');
+    inputs.forEach(input => {
+        input.required = isRequired; // Set required attribute based on the parameter
+    });
 }
 
 function updateQuantity(vehicleName, change) {
@@ -43,6 +52,23 @@ function updateQuantity(vehicleName, change) {
     }
 }
 
+function validateVehicleQuantities() {
+    const vehicleInputs = document.querySelectorAll('input[name^="mcmVehicleQuantity"]'); // Select all vehicle quantity inputs
+    let isValid = false;
+
+    // Check if at least one vehicle has a quantity greater than 0
+    vehicleInputs.forEach(input => {
+        if (parseInt(input.value) > 0) {
+            isValid = true; // Set valid if any quantity is greater than 0
+        }
+    });
+
+    if (!isValid) {
+        alert("Please select at least one vehicle with a quantity greater than 0.");
+    }
+
+    return isValid; // Return true to allow form submission if valid
+}
 
 
 function addRow(tableId) {

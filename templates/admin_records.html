@@ -10,7 +10,7 @@
       function redirectToDetails(startDate, vehicleType, requestedBy) {
         // Redirect to the details page with query parameters
         window.location.href = `/admin_records_detailed?start_date=${encodeURIComponent(startDate)}&vehicle_type=${encodeURIComponent(vehicleType)}&requested_by=${encodeURIComponent(requestedBy)}`;
-    }
+      }
     </script>
 </head>
 <body>
@@ -27,13 +27,17 @@
   </div>
     <div class="main-content">
         <h2>Records Entry</h2>
-        <div class="input-fields">
-            <input class="box" placeholder="Enter Date Filled">
-            <input class="box" placeholder="Enter Name">
-            <input class="box" placeholder="Enter Start Date">
-        </div>
+        <form action="/admin_records" method="POST">
+          <div class="input-fields">
+            <input class="box" name="name" placeholder="Enter Name" value="{{ name }}" />
+            <input class="box" name="start_date" type="date" placeholder="Enter Start Date" value="{{ start_date }}" />
+            <input class="box" name="end_date" type="date" placeholder="Enter End Date" value="{{ end_date }}" />
+            <button type="submit" style="padding: 10px 20px; background-color: #007BFF; color: white; border: none; border-radius: 4px;">Filter</button>
+          </div>
+        </form>
         <br><br>
         <h3>Denied Requests</h3>
+        
         <div class="denied-square">
           <table>
             <thead>
@@ -50,7 +54,7 @@
             </thead>
             <tbody>
               {% for record in records %}
-                  {% if record['Approval'] == 1 or (record['Approval'] == 0 and record['Remarks'] is not none) %}
+                  {% if record['Approval'] == 0 and record['Remarks'] is not none %}
                       <tr class="denied-row" 
                           onclick="redirectToDetails('{{ record['StartDate'] }}', '{{ record['VehicleType'] }}', '{{ record['RequestedBy'] }}')">
                           <td>{{ record['DateFilled'] }}</td>
@@ -81,7 +85,7 @@
               </tr>
               <tbody>
                 {% for record in records %}
-                  {% if record['Approval'] == 1 %}
+                  {% if record['Approval'] == 1 and record['Remarks'] is none %}
                     <tr class="data-row"
                       onclick="redirectToDetails('{{ record['StartDate'] }}', '{{ record['VehicleType'] }}', '{{ record['RequestedBy'] }}')">
                       <td>{{ record['DateFilled'] }}</td>

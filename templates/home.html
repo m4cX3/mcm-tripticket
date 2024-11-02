@@ -79,6 +79,7 @@
     section[title="Vehicle List"] {
       display: grid;
       place-items: center;
+      text-align: center;
       gap: 4rem;
       padding: 2rem;
       color: var(--foreground);
@@ -130,33 +131,25 @@
           “Forms must be processed 3 working days before the scheduled trip”
         </p>
         <button onclick="goLogin()">Get Started</button>
-      </section>
-      <section title="Vehicle List">
-        <h2>List of Vehicles</h2>
-        <div id="vehicle-list">
-          {% for vehicle in data %}
-          <div class="card">
-            <img src="{{vehicle.image}}" alt="" width="200" height="200" />
-            <h3>{{ vehicle.label }}</h3>
-            <p>Quantity: {{ vehicle.quantity }}</p>
-            <p>
-              {%if vehicle.status == 'Available' %}
-              <button
-                style="color: var(--foreground); background-color: lightgreen"
-              >
-                {{ vehicle.status }}
-              </button>
-              {%else%}
-              <button style="color: white; background-color: red">
-                {{ vehicle.status }}
-              </button>
-              {%endif%}
-            </p>
+        </section>
+        <section title="Vehicle List">
+          <h2>List of Vehicles</h2>
+          <div id="vehicle-list">
+              {% for vehicle in details %}
+                  <div class="vehicle" id="vehicle_{{ vehicle.VehicleName }}">
+                      <h2>{{ vehicle.VehicleName }}</h2>
+                      <div class="vehicle-content" style="display: flex; flex-direction: column; align-items: center;">
+                      <img src="data:image/jpeg;base64,{{ vehicle.VehicleImage }}" alt="{{ vehicle.VehicleName }}" style="max-width: 300px; max-height: 300px; border-radius: 18px">
+                      {% if vehicle.AvailableQuantity != 0 %}
+                          <button style="background-color: rgb(163, 235, 163); display: block; margin-top: 10px; text-align: center">
+                              Available: <strong id="available_{{ vehicle.VehicleName }}">{{ vehicle.AvailableQuantity }}</strong>
+                          </button>
+                      {% endif %}
+                      </div>
+                  </div>
+              {% endfor %}
           </div>
-          {% endfor %}
-        </div>
-      </section>
-      
+        </section>
       <section title="General Policy">
         <div>
             <h1>

@@ -169,6 +169,7 @@ def show_mcm_vehicles():
                 v.VehicleQuantity, 
                 v.VehicleSeatingCapacity, 
                 v.VehicleImage,
+                v.VehicleOdometer,
                 COUNT(CASE WHEN t.Approval = 1 OR (t.Approval = 0 AND t.Remarks IS NOT NULL) THEN vd.VehicleID END) AS UsedQuantity
             FROM 
                 mcm_listvehicles v

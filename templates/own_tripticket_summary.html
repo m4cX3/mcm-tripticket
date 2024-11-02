@@ -10,6 +10,10 @@
             // Redirect back to the trip ticket form
             window.location.href = '/trip_ticket?username=' + username;
         }
+        history.pushState(null, null, location.href);
+        window.addEventListener('popstate', function(event) {
+        history.pushState(null, null, location.href);
+        });
     </script>
 </head>
 <body>

@@ -5,6 +5,7 @@ body {
     padding: 0;
 }
 
+
 /* Sidebar */
 .sidebar {
     height: 100%;
@@ -110,6 +111,7 @@ td {
     border-radius: 10px;
     align-items: center;
     margin-bottom: 20px;
+    color: white;
 }
 
 .vehicle-section img {
