@@ -1,0 +1,190 @@
+/* General body styling */
+body {
+    font-family: Arial, sans-serif;
+    background-color: #e9e9e9;
+    margin: 0;
+    padding: 0;
+}
+
+.header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px;
+    background-color: #ffffff;
+    border-bottom: 0px solid #ccc;
+}
+
+.header img {
+    height: 60px;
+}
+
+.header h2 {
+    margin: 0;
+    color: #14213d;
+    font-size: 16px;
+}
+
+
+.badge-logo {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 20px;
+}
+
+.badge-logo img {
+    max-width: 100px;
+}
+
+/* Main content styling */
+.main-content {
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: center; /* This centers children horizontally */
+    justify-content: center; /* This centers children vertically */
+    min-height: 100vh; /* Full viewport height to allow vertical centering */
+    margin-left: 60px;
+}
+
+/* Section headers */
+h1, h2{
+    color: #333;
+    margin-bottom: 10px;
+    text-align: center;
+    margin-top: 50px;
+}
+
+h3{
+    color: white;
+    text-align: center;
+}
+
+/* Summary box at the top */
+.summary-box, .vehicle-section, .details-box {
+    width: 80%; /* Adjust the width to your needs */
+    max-width: 800px; /* Maximum width for larger screens */
+    padding: 20px; /* Keep consistent padding */
+    background-color: #547AAC;
+    color: white;
+    border-radius: 10px;
+    margin-bottom: 20px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+}
+
+.summary-box ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.summary-box li {
+    margin-bottom: 8px;
+}
+
+/* Travel details box */
+.details-box {
+    background-color: #547AAC;
+    padding: 20px;
+    border-radius: 10px;
+    margin-bottom: 20px;
+    
+}
+
+.details-box table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 10px;
+}
+
+.details-box th {
+    border: 1px solid #ccc;
+    padding: 10px;
+    text-align: center;
+    color: white
+}
+
+.details-box td {
+    color: black;
+    border: 1px solid #ccc;
+    padding: 10px;
+    text-align: center;
+}
+
+th {
+    background-color: #547AAC;
+    color: #fff;
+}
+
+td {
+    background-color: #fff;
+}
+
+/* Vehicle section */
+.vehicle-section {
+    display: flex;
+    flex-direction: column;
+    background-color: #547AAC;
+    padding: 20px;
+    border-radius: 10px;
+    align-items: center;
+    margin-bottom: 20px;
+    color: white
+}
+
+.vehicle-section img {
+    width: 150px;
+    margin-right: 20px;
+    border-radius: 8px;
+}
+
+.vehicle-section li {
+    list-style: none;
+    padding: 0;
+    text-align: center;
+    margin-bottom: 10px;
+}
+
+/* Buttons for Approve and Deny */
+ /* Buttons for Approve and Deny */
+ .button-container {
+    display: flex;
+    justify-content: center;
+    margin-top: 30px;
+}
+
+.button-container input {
+    padding: 10px 20px;
+    font-size: 18px;
+    border: none;
+    color: white;
+    border-radius: 5px;
+    cursor: pointer;
+    margin: 0 10px;
+    transition: background-color 0.3s;
+}
+
+.approve-button {
+    background-color: #00c853;
+}
+
+.deny-button {
+    background-color: #f44336;
+}
+
+/* Hover effects for buttons */
+.approve-button:hover {
+    background-color: #009624;
+}
+
+.deny-button:hover {
+    background-color: #d32f2f;
+}
+
+p{
+    text-align: center;
+}

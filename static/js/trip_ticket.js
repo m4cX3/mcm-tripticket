@@ -1,8 +1,6 @@
 function toggleFields() {
     var ownVehicleFields = document.getElementById("ownVehicleFields");
     var mcmVehicleFields = document.getElementById("mcmVehicleFields");
-    var ownVehicleTable = document.getElementById("ownVehicleTable");
-    var mcmVehicleTable = document.getElementById("mcmVehicleTable");
     var ownVehicleRadio = document.getElementById("ownVehicle");
     var mcmVehicleRadio = document.getElementById("mcmVehicle");
 
@@ -19,31 +17,57 @@ function toggleFields() {
             }
         }
     }
-    
+
     // Toggle visibility based on the selected radio button
     if (ownVehicleRadio.checked) {
         ownVehicleFields.style.display = "block";
         mcmVehicleFields.style.display = "none";
         clearTableRows(mcmVehicleTable); // Clear MCM vehicle table
+        setRequiredFields(ownVehicleFields, true); // Set own vehicle fields as required
+        setRequiredFields(mcmVehicleFields, false); // Remove requirement from MCM fields
     } else if (mcmVehicleRadio.checked) {
         mcmVehicleFields.style.display = "block";
         ownVehicleFields.style.display = "none";
         clearTableRows(ownVehicleTable); // Clear Own vehicle table
+        setRequiredFields(mcmVehicleFields, true); // Set MCM fields as required
+        setRequiredFields(ownVehicleFields, false); // Remove requirement from own vehicle fields
     }
+}
+
+function setRequiredFields(container, isRequired) {
+    const inputs = container.querySelectorAll('input[type="text"], input[type="date"], input[type="number"], input[type="radio"]');
+    inputs.forEach(input => {
+        input.required = isRequired; // Set required attribute based on the parameter
+    });
 }
 
 function updateQuantity(vehicleName, change) {
     const quantityInput = document.getElementById(vehicleName + '_quantity');
-    let currentQuantity = parseInt(quantityInput.value) || 0;
+    const availableQuantity = parseInt(quantityInput.getAttribute('max'));
+    let newQuantity = parseInt(quantityInput.value) + change;
 
-    currentQuantity += change;
-    if (currentQuantity < 0) currentQuantity = 0;
-    if (currentQuantity > parseInt(quantityInput.max)) currentQuantity = parseInt(quantityInput.max);
+    if (newQuantity >= 0 && newQuantity <= availableQuantity) {
+        quantityInput.value = newQuantity;
+        document.getElementById(vehicleName + '_selected_quantity').value = newQuantity;
+    }
+}
 
-    quantityInput.value = currentQuantity;
+function validateVehicleQuantities() {
+    const vehicleInputs = document.querySelectorAll('input[name^="mcmVehicleQuantity"]'); // Select all vehicle quantity inputs
+    let isValid = false;
 
-    // Update the corresponding hidden input for submission
-    document.getElementById(vehicleName + '_selected_quantity').value = currentQuantity;
+    // Check if at least one vehicle has a quantity greater than 0
+    vehicleInputs.forEach(input => {
+        if (parseInt(input.value) > 0) {
+            isValid = true; // Set valid if any quantity is greater than 0
+        }
+    });
+
+    if (!isValid) {
+        alert("Please select at least one vehicle with a quantity greater than 0.");
+    }
+
+    return isValid; // Return true to allow form submission if valid
 }
 
 
@@ -56,7 +80,7 @@ function addRow(tableId) {
     var cell3 = newRow.insertCell(2);
     var cell4 = newRow.insertCell(3);
 
-    cell1.innerHTML = '<input type="text" name="start_date[]" placeholder="Insert starting date here">';
+    cell1.innerHTML = '<input type="date" name="start_date[]" placeholder="Insert starting date here">';
     cell2.innerHTML = '<input type="text" name="start_time[]" placeholder="Insert starting time here">';
     cell3.innerHTML = '<input type="text" name="estimated_return[]" placeholder="Insert returning time here">';
     cell4.innerHTML = '<input type="text" name="destinations[]" placeholder="Insert name of destinations here">';

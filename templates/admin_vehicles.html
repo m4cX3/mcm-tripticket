@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Form Summary</title>
+    <link href='https://fonts.googleapis.com/css?family=Poppins' rel='stylesheet'>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/admin_records_detailed.css') }}" type="text/css">
+</head>
+<body>
+    <!-- Sidebar -->
+    <div class="sidebar">
+        <div class="badge-logo">
+            <img id="mcm" src="{{ url_for('static', filename='images/mmcm small logo.png') }}" alt="MMCM Logo">
+        </div>
+        <a href='{{ url_for('admin_dashboard_page', username=username) }}'>Dashboard</a>
+        <a href='{{ url_for('admin_requests_page', username=username) }}'>Requests</a>
+        <a href='{{ url_for('admin_records_page', username=username) }}'>Records</a>
+        <a href='{{ url_for('admin_vehicles_page', username=username) }}'>Vehicles</a>
+        <br><br>
+        <a href='{{ url_for('login_page') }}'>Log Out</a>
+    </div>
+
+    <!-- Main content -->
+    <div class="main-content">
+        <h3>List of Vehicles</h3>
+        <br>
+        <div class="summary-box">
+            {% for vehicle in details %}
+                {% if vehicle.AvailableQuantity != 0 %}
+                <div class="vehicle" id="vehicle_{{ vehicle.VehicleName }}">
+                    <h2 style="color: white; text-align: center">{{ vehicle.VehicleName }}</h2>
+                    <img src="data:image/jpeg;base64,{{ vehicle.VehicleImage }}" alt="{{ vehicle.VehicleName }}" style="max-width: 300px; max-height: 300px;">
+                    <p style="text-align: center">Available: <strong id="available_{{ vehicle.VehicleName }}">{{ vehicle.AvailableQuantity }}</strong></p>
+                    <p style="text-align: center">Seating Capacity: {{ vehicle.VehicleSeatingCapacity }}</p>
+                    <input type="hidden" name="vehicle_name[]" value="{{ vehicle.VehicleName }}">
+                    <input type="hidden" id="{{ vehicle.VehicleName }}_selected_quantity" name="mcmVehicleQuantity[{{ vehicle.VehicleName }}]" value="0">
+                </div>
+                {% endif %}
+            {% endfor %}
+        </div>        
+    </div>
+</body>
+</html>

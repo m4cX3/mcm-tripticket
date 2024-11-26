@@ -92,20 +92,6 @@ body {
   border-spacing: 0 10px;
 }
 
-.denied-square {
-  height: fit-content;
-  width: auto;
-  padding: 30px;
-  border-radius: 3%;
-  background-color: #d41414bc;
-}
-
-.denied-square table {
-  width: 100%;
-  border-collapse: collapse;
-  border-spacing: 0 10px;
-}
-
 .header-row {
   background-color: #ffffffb9; /* Background color of the header row */
 }
@@ -153,44 +139,44 @@ body {
   border-bottom-right-radius: 7px;
 }
 
-.denied-row td:first-child {
-  border-top-left-radius: 7px; /* Smooth corners for the left side */
-  border-bottom-left-radius: 7px;
+.cards {
+  display: flex;
+  flex-wrap: wrap; /* Allow cards to wrap if necessary */
+  gap: 20px; /* Maintain spacing between cards */
+  margin-bottom: 20px;
 }
 
-.denied-row td:last-child {
-  border-top-right-radius: 7px; /* Smooth corners for the right side */
-  border-bottom-right-radius: 7px;
+.card {
+  overflow: hidden;
+  flex: 1 1 calc(25% - 20px); /* Allow cards to grow and shrink */
+  min-width: 250px; /* Set a minimum width for better responsiveness */
+  background-color: white;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
-.denied-row:nth-child(odd) {
-  background-color: #ffffffa9; /* Lighter color for odd rows */
+.card h2 {
+  font-size: 25px; /* Adjust font size */
+  margin-bottom: 10px; /* Space below title */
 }
 
-.denied-row:nth-child(even) {
-  background-color: #f8000085; /* Darker color for even rows */
+.card p {
+  font-size: 25px; /* Adjust font size */
+  margin: 0; /* Remove margin */
+  white-space: normal; /* Allow wrapping */
 }
 
-.denied-row {
-  min-height: 50px;
-  padding: 10px 20px;
-  color: rgb(0, 0, 0);
-  text-align: center;
-  border: none;
-}
-  
-.denied-row td:first-child {
-  border-top-left-radius: 7px; /* Smooth corners for the left side */
-  border-bottom-left-radius: 7px;
-}
-
-.denied-row td:last-child {
-  border-top-right-radius: 7px; /* Smooth corners for the right side */
-  border-bottom-right-radius: 7px;
-}
 
 /* Media Queries */
-@media screen and (max-height: 450px) {
-  .sidenav { padding-top: 15px; }
-  .sidenav a { font-size: 18px; }
+@media screen and (max-width: 768px) {
+  .card {
+    flex: 1 1 calc(50% - 20px); /* Two cards per row on smaller screens */
+  }
+}
+
+@media screen and (max-width: 480px) {
+  .card {
+    flex: 1 1 100%; /* Full width on mobile */
+  }
 }
