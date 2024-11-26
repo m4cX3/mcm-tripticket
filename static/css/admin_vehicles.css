@@ -1,0 +1,206 @@
+body {
+    background-color: #d9d9d9;
+    font-family: "Poppins";
+    margin: 0;
+    padding: 0;
+}
+
+
+/* Sidebar */
+.sidebar {
+    height: 100%;
+    width: 250px;
+    position: fixed;
+    top: 0;
+    left: 0;
+    background-color: #f1f1f1;
+    padding-top: 20px;
+    box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
+}
+
+.sidebar a {
+    padding: 15px 25px;
+    text-decoration: none;
+    font-size: 18px;
+    color: #333;
+    display: block;
+}
+
+.sidebar a:hover {
+    background-color: #ebebeb;
+    color: #007bff;
+}
+
+.badge-logo {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 20px;
+}
+
+.badge-logo img {
+    max-width: 100px;
+}
+
+/* Main content styling */
+.main-content {
+    margin-left: 270px;
+    padding: 20px;
+}
+
+/* Section headers */
+h1, h2, h3 {
+    color: #333;
+    margin-bottom: 10px;
+}
+
+/* Summary box at the top */
+.summary-box {
+    background-color: #547AAC;
+    padding: 20px;
+    color: white;
+    border-radius: 10px;
+    margin-bottom: 20px;
+    display: flex;
+    justify-content: space-between;
+}
+
+.summary-box ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.summary-box li {
+    margin-bottom: 8px;
+}
+
+/* Travel details box */
+.details-box {
+    background-color: #547AAC;
+    padding: 20px;
+    border-radius: 10px;
+    margin-bottom: 20px;
+}
+
+.details-box table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 10px;
+}
+
+.details-box th, .details-box td {
+    border: 1px solid #ccc;
+    padding: 10px;
+    text-align: center;
+}
+
+th {
+    background-color: #547AAC;
+    color: #fff;
+}
+
+td {
+    background-color: #fff;
+}
+
+/* Vehicle section */
+.vehicle-section {
+    display: flex;
+    background-color: #547AAC;
+    padding: 20px;
+    border-radius: 10px;
+    align-items: center;
+    margin-bottom: 20px;
+    color: white;
+}
+
+.vehicle-section img {
+    width: 150px;
+    margin-right: 20px;
+    border-radius: 8px;
+}
+
+.vehicle-info ul {
+    list-style: none;
+    padding: 0;
+}
+
+.button-container {
+    display: flex;
+    justify-content: center;
+    margin-top: 30px;
+}
+
+.button-container input {
+    padding: 10px 20px;
+    font-size: 18px;
+    border: none;
+    color: white;
+    border-radius: 5px;
+    cursor: pointer;
+    margin: 0 10px;
+    transition: background-color 0.3s;
+}
+
+.approve-button {
+    background-color: #00c853;
+}
+
+.deny-button {
+    background-color: #f44336;
+}
+
+/* Hover effects for buttons */
+.approve-button:hover {
+    background-color: #009624;
+}
+
+.deny-button:hover {
+    background-color: #d32f2f;
+}
+
+.modal {
+    display: none;
+    position: fixed;
+    z-index: 1;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+}
+
+.modal-content {
+    background-color: white;
+    margin: 15% auto;
+    padding: 20px;
+    width: 30%;
+    border-radius: 10px;
+}
+
+.close {
+    color: #aaa;
+    float: right;
+    font-size: 28px;
+    font-weight: bold;
+}
+
+.close:hover, .close:focus {
+    color: black;
+    text-decoration: none;
+    cursor: pointer;
+}
+
+.modal textarea {
+    width: 100%;
+    height: 100px;
+    margin-bottom: 15px;
+}
+
+.modal .button-container {
+    text-align: center;
+}
+
+.modal .button-container button {
+    margin: 5px;
+}

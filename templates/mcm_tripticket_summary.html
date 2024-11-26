@@ -4,56 +4,71 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Form Summary</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/mcm_tripticket_summary.css') }}" type="text/css" >
     <script>
         function denyData(username) {
             // Redirect back to the trip ticket form
             window.location.href = '/trip_ticket?username=' + username;
         }
+        history.pushState(null, null, location.href);
+        window.addEventListener('popstate', function(event) {
+        history.pushState(null, null, location.href);
+        });
     </script>
 </head>
 <body>
-    <form action="{{ url_for('insert_mcm_form_to_database', username=session['username']) }}" method="POST">
-    <h1>Form Submission Summary</h1>
-    <h2>Submitted Data:</h2>
-    <ul>
-        <li><strong>Date Filled:</strong> {{ data.dateFilled }}</li>
-        <li><strong>Requested By:</strong> {{ data.requestedBy }}</li>
-        <li><strong>Department:</strong> {{ data.department }}</li>
-        <li><strong>Purpose of Trip:</strong> {{ data.purpose }}</li>
-        <li><strong>Vehicle Type:</strong> {{ data.vehicle }}</li>
-        <br>
-        <li><strong>Chosen Vehicles:</strong></li>
-        <ul>
-            {% for vehicle in data.mcmVehicles %}
-            <li>Vehicle Name: {{ vehicle.name }}</li>
-            <li>Quantity: {{vehicle.quantity}}</li>
-            {% endfor %}
-        </ul>
-    </ul>
-
-    <h3>Travel Details:</h3>
-    <table border="1">
-        <tr>
-            <th>Start Date</th>
-            <th>Start Time</th>
-            <th>Estimated Return</th>
-            <th>Destinations</th>
-        </tr>
-        {% for start_date, start_time, return_time, destination in data.travel_details %}
-            <tr>
-                <td>{{ start_date }} </td>
-                <td>{{ start_time }}</td>
-                <td>{{ return_time }}</td>
-                <td>{{ destination }}</td>
-            </tr>
-        {% endfor %}
-    </table>
-    
-    <br>
-    <p>Would you like to continue?</p>
-    <br>
-    <input type="submit" id="submit" name="submit" value="Yes">
-    <input type="button" id="deny" name="deny" value="No" onclick="denyData('{{ username }}')">
-    </form>
+    <div class="header">
+        <img src="{{ url_for('static', filename='images/mmcm logo.png') }}" alt="MMCM Logo">
+        <h2>Institutional Facilities Office (IFO)</h2>
+    </div>
+    <h1>Please confirm details below:</h1>
+    <div class="main-content">
+        <form action="{{ url_for('insert_mcm_form_to_database', username=session['username']) }}" method="POST">
+            <!-- Summary box -->
+            <div class="summary-box">
+                <ul>
+                    <li><strong>Date Filled:</strong> {{ data.dateFilled }}</li>
+                    <li><strong>Requested By:</strong> {{ data.requestedBy }}</li>
+                    <li><strong>Department:</strong> {{ data.department }}</li>
+                    <li><strong>Purpose of Trip:</strong> {{ data.purpose }}</li>
+                </ul>
+                <ul>
+                    <li><strong>Vehicle Type:</strong> {{ data.vehicle }}</li>
+                </ul>
+            </div>
+            <br>
+            <div class="vehicle-section">
+                <h3>Chosen Vehicles:</h3>
+                {% for vehicle in data.mcmVehicles %}
+                <li>Vehicle Name: {{ vehicle.name }}</li>
+                <li>Quantity: {{vehicle.quantity}}</li>
+                {% endfor %}
+            </div>
+            <div class="details-box">
+                <h3>Travel Details:</h3>
+                <table border="1">
+                    <tr>
+                        <th>Start Date</th>
+                        <th>Start Time</th>
+                        <th>Estimated Return</th>
+                        <th>Destinations</th>
+                    </tr>
+                    {% for start_date, start_time, return_time, destination in data.travel_details %}
+                        <tr>
+                            <td>{{ start_date }} </td>
+                            <td>{{ start_time }}</td>
+                            <td>{{ return_time }}</td>
+                            <td>{{ destination }}</td>
+                        </tr>
+                    {% endfor %}
+                </table>
+            </div> 
+            <br>
+            <p>Would you like to continue?</p>
+            <br>
+            <input type="submit" id="submit" name="submit" value="Yes">
+            <input type="button" id="deny" name="deny" value="No" onclick="denyData('{{ username }}')">
+        </form>
+    </div>
 </body>
 </html>
