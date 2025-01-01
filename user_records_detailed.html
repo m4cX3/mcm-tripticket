@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Form Summary</title>
+    <link href='https://fonts.googleapis.com/css?family=Poppins' rel='stylesheet'>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/user_records_detailed.css') }}" type="text/css">
+    
+</head>
+<body>
+    <!-- Sidebar -->
+    <div class="sidebar">
+        <div class="badge-logo">
+            <img id="mcm" src="{{ url_for('static', filename='images/mmcm small logo.png') }}" alt="MMCM Logo">
+        </div>
+        <a href='{{ url_for('user_dashboard_page', username=username) }}'>Dashboard</a>
+        <a href='{{ url_for('user_records_page', username=username) }}'>Records</a>
+        <a href='{{ url_for('terms_and_conditions_page', username=username) }}'">Add Request</a>
+        <br><br>
+        <a href='{{ url_for('login_page') }}'>Log Out</a>
+    </div>
+
+    <!-- Main content -->
+    <div class="main-content">
+        {% if details %}
+            {% if details[0]['Approval'] == 0 and details[0]['Remarks'] is none %}
+            <h3>This is a pending request</h3>
+            {% endif %}
+            {% if details[0]['Approval'] == 0 and details[0]['Remarks'] is not none %}
+            <h3>Your request has been denied</h3>
+            {% endif %}
+            {% if details[0]['Approval'] == 1 %}
+            <h3>Request has been accepted</h3>
+            {% endif %}
+            <!-- Summary box -->
+            <div class="summary-box">
+                {% if details %}
+                    <ul>
+                        <li><strong>Date Filled:</strong> {{ details[0]['DateFilled'] }}</li>
+                        <li><strong>Requested By:</strong> {{ details[0]['RequestedBy'] }}</li>
+                        <li><strong>Department:</strong> {{ details[0]['Department'] }}</li>
+                        <li><strong>Purpose of Trip:</strong> {{ details[0]['Purpose_Of_Trip'] }}</li>
+                        <li><strong>Vehicle Type:</strong> {{ details[0]['VehicleType'] }}</li>
+                        <br>
+                        
+                        {% if details[0]['VehicleType'] == "Own Vehicle" %}
+                            <li><strong>Vehicle Name:</strong> {{ details[0]['VehicleName'] }}</li>
+                            <li><strong>Vehicle Classification:</strong> {{ details[0]['Classification'] }}</li>
+                            <li><strong>Vehicle Seating Capacity:</strong> {{ details[0]['SeatingCapacity'] }}</li>
+                            <li><strong>Vehicle Plate Number:</strong> {{ details[0]['PlateNumber'] }}</li>
+                        {% elif details[0]['VehicleType'] == "MCM Vehicle" %}
+                            <li><strong>Vehicle Name:</strong> {{ details[0]['VehicleName'] }}</li>
+                            <li><strong>Vehicle Quantity:</strong> {{ details[0]['VehicleQuantity'] }}</li>
+                        {% endif %}
+
+                        {% if details[0]['Remarks'] is not none %}
+                        <br><br><li><strong>Remarks for Denial: </strong> {{ details[0]['Remarks']}}</li>
+                        {% endif %}
+                    </ul>
+                {% else %}
+                    <p>No vehicle details available for the selected criteria.</p>
+                {% endif %}
+            </div>
+            
+            <div class="details-box">
+                <h3 style="color: white">Travel Details:</h3>
+                <table>
+                    <tr>
+                        <th>Start Date</th>
+                        <th>Start Time</th>
+                        <th>Estimated Return</th>
+                        <th>Destinations</th>
+                    </tr>
+                    {% for travel in details %}
+                        <tr>
+                            <td>{{ travel.StartDate }}</td>
+                            <td>{{ travel.StartTime }}</td>
+                            <td>{{ travel.EstimatedReturns }}</td>
+                            <td>{{ travel.Destinations }}</td>
+                        </tr>
+                    {% endfor %}
+                </table>
+        {%else%}
+            <p>No record found</p>
+        {%endif%}
+        </div>
+    </div>
+</body>
+</html>

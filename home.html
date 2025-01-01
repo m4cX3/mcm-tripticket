@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Home</title>
+    <link
+      href="https://fonts.googleapis.com/css?family=Poppins"
+      rel="stylesheet"
+    />
+
+    <link
+      rel="stylesheet"
+      href="{{ url_for('static', filename='css/variables.css') }}"
+      type="text/css"
+    />
+  </head>
+  <script>
+    function goLogin(){
+      window.location.href = '/login';
+    }
+  </script>
+  <style>
+    body {
+      display: grid;
+      grid:
+        "header" auto
+        "main" 1fr
+        "footer" auto
+        / 1fr;
+    }
+
+    header {
+      grid-area: header;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0.5rem;
+      color: #0f2554;
+    }
+    main {
+      grid-area: main;
+    }
+    section[title="hero-section"] {
+      background: url("/static/images/hero-image.jpeg");
+      background-size: cover;
+      position: relative;
+      display: grid;
+      grid-template-rows: 1fr auto auto;
+      gap: 1rem;
+      padding: 2rem;
+      place-items: center;
+      height: 88vh;
+    }
+    section[title="hero-section"]::before {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0, 0, 0, 0.5);
+      z-index: 1;
+    }
+    section[title="hero-section"] > * {
+      z-index: 2;
+    }
+    section[title="hero-section"] h1 {
+      font-size: 5rem;
+    }
+    section[title="hero-section"] button {
+      padding-block: 1rem;
+      padding-inline: 4rem;
+      background-color: var(--destructive);
+      color: white;
+      font-size: 2rem;
+      border-radius: 4rem;
+    }
+    section[title="Vehicle List"] {
+      display: grid;
+      place-items: center;
+      text-align: center;
+      gap: 4rem;
+      padding: 2rem;
+      color: var(--foreground);
+      #vehicle-list {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 2rem;
+        place-items: center;
+        width: 100%;
+      }
+    }
+
+
+    section[title="General Policy"] {
+      display: grid;
+      place-items: center;
+      grid-template-columns: repeat(2, 1fr);
+      padding: 4rem;
+      background-color: var(--accent-muted);
+      color: var(--foreground);
+      gap: 4rem;
+      text-align: justify;
+      img{
+        border-radius: 40px;
+      }
+ 
+    }
+    footer {
+      grid-area: footer;
+    }
+    .card {
+      border-radius: 8px;
+      text-align: center;
+      img {
+        width: 420px;
+        border-radius: 50px;
+      }
+    }
+  </style>
+  <body>
+    <header>
+      <img src="/static/images/logo.png" width="250" alt="" />
+      <h1>Institutional Facilities Office (IFO)</h1>
+    </header>
+    <main>
+      <section title="hero-section">
+        <h1>Automated Trip Ticket</h1>
+        <p>
+          “Forms must be processed 3 working days before the scheduled trip”
+        </p>
+        <button onclick="goLogin()">Get Started</button>
+        </section>
+        <section title="Vehicle List">
+          <h2>List of Vehicles</h2>
+          <div id="vehicle-list">
+              {% for vehicle in details %}
+                  <div class="vehicle" id="vehicle_{{ vehicle.VehicleName }}">
+                      <h2>{{ vehicle.VehicleName }}</h2>
+                      <div class="vehicle-content" style="display: flex; flex-direction: column; align-items: center;">
+                      <img src="data:image/jpeg;base64,{{ vehicle.VehicleImage }}" alt="{{ vehicle.VehicleName }}" style="max-width: 300px; max-height: 300px; border-radius: 18px">
+                      {% if vehicle.AvailableQuantity != 0 %}
+                          <button style="background-color: rgb(163, 235, 163); display: block; margin-top: 10px; text-align: center">
+                              Available: <strong id="available_{{ vehicle.VehicleName }}">{{ vehicle.AvailableQuantity }}</strong>
+                          </button>
+                      {% endif %}
+                      </div>
+                  </div>
+              {% endfor %}
+          </div>
+        </section>
+      <section title="General Policy">
+        <div>
+            <h1>
+                General Policy
+            </h1>
+            <br>
+            <p>
+                Mapúa Malayan Colleges Mindanao through the Institutional Facilities Office (IFO) fosters a safe and secure driving environment by establishing measures governing the use and maintenance of vehicles across all operating areas and to cater the performance of employee’s duties and functions.
+            </p>
+        </div>
+
+        <div>
+            <img src="/static/images/general-policy-image.jpeg"  alt="">
+        </div>
+      </section>
+    </main>
+    <footer></footer>
+  </body>
+</html>

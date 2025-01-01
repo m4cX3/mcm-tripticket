@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Login</title>
+    <link href='https://fonts.googleapis.com/css?family=Poppins' rel='stylesheet'>
+
+    <link
+      rel="stylesheet"
+      href="{{ url_for('static', filename='css/variables.css') }}"
+      type="text/css"
+    />
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        background: url("/static/images//general-policy-image.jpeg");
+        background-size: cover;
+        display: grid;
+        place-items: center;
+        height: 100vh;
+        margin: 0;
+        position: relative;
+      }
+      body::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(0, 0, 0, 0.5);
+      }
+      body > * {
+        z-index: 1;
+      }
+      .school-logo {
+        place-self: center;
+        margin-bottom: auto;
+        margin-top: 3%;
+      }
+      .login-container {
+        position: absolute;
+        top: 20%;
+        background-color: var(--background);
+        padding-inline: 2.5rem;
+        border-radius: 50px;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        width: 520px;
+        height: 700px;
+        margin-top: auto;
+        opacity: 80%;
+        display: grid;
+        grid-template-rows: 1fr auto 1fr;
+        gap: 1rem;
+      }
+      .login-container h1,
+      p {
+        text-align: center;
+        color: var(--foreground);
+      }
+      input {
+        background-color: var(--accent);
+        color: var(--accent-foreground);
+        width: 100%;
+        &::placeholder {
+          color: var(--accent-foreground);
+        }
+      }
+
+      .login-container input[type="email"],
+      .login-container input[type="password"] {
+        width: 100%;
+        padding: 1.5rem;
+        margin: 8px 0;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+      }
+      .login-container input[type="submit"] {
+        padding: 1rem 5rem;
+        border-radius: 50px;
+        background-color: var(--primary);
+        color: white;
+        border: none;
+        border-radius: 50px;
+        cursor: pointer;
+        font-weight: bold;
+        margin-top: 2rem;
+      }
+      .login-container input[type="submit"]:hover {
+        background-color: var(--primary);
+        opacity: 0.8;
+      }
+    </style>
+  </head>
+  <body>
+    <img
+      class="school-logo"
+      src="/static/images/school-logo.png"
+      alt="school-logo"
+      width="120px"
+    />
+    <div class="login-container">
+        <div style="margin-top: auto;">
+            <h1>Sign In</h1>
+            <br>
+            <p>Please enter your MMCM Email Address</p>
+            {% if msg %}
+            <div style="color: red">{{ msg }}</div>
+            <!-- Display error message in red -->
+            {% endif %}
+        </div>
+      
+      <form method="POST" action="/login">
+        <input
+          type="email"
+          id="email"
+          name="email"
+          placeholder="Email address"
+          required
+        />
+
+        <input
+          type="password"
+          id="password"
+          name="password"
+          placeholder="Password"
+          required
+        />
+        <center>
+          <input type="submit" value="Login" />
+        </center>
+      </form>
+    </div>
+  </body>
+</html>
