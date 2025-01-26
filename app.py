@@ -1,7 +1,7 @@
 from flask import Flask, render_template, request, redirect, url_for, session, json
 from datetime import datetime
 from configuration.sql_connections import *
-from configuration.submitform import submitform
+from configuration.submitform import submitform, insert_vehicle, insert_specific_vehicle
 from configuration.login import login, get_user_id
 
 app = Flask(__name__)
@@ -178,6 +178,35 @@ def admin_vehicles_page():
     print(complete_details)
     return render_template('admin_vehicles.html', details=complete_details, username=username)
 
+@app.route('/admin_vehicles_detailed/<vehicle_name>', methods=['GET', 'POST'])
+def admin_vehicles_detailed_page(vehicle_name):
+    username = session.get('username')
+    
+    if not vehicle_name:
+        return redirect(url_for('admin_vehicles_page'))  # Redirect if no vehicle name provided
+
+    complete_details = show_vehicles_detailed(vehicle_name)
+    print(complete_details)
+
+    if request.method == 'POST':
+        form_data = insert_specific_vehicle()
+        add_specific_vehicle(form_data)
+        return redirect(url_for('admin_vehicles_detailed_page', username=username, vehicle_name=vehicle_name))
+    
+    return render_template('admin_vehicles_detailed.html', details=complete_details, username=username, vehicle_name=vehicle_name)
+
+
+@app.route('/add_vehicles', methods=['GET', 'POST'])
+def add_vehicles_page():
+    username = session.get('username')
+    if request.method == 'POST':
+        form_data = insert_vehicle()
+        add_vehicle(form_data)
+        return redirect(url_for('admin_vehicles_page', username=username))
+
+    return render_template('add_vehicle.html', username=username)
+
+
 @app.route('/user_records', methods=['GET', 'POST'])
 def user_records_page():
     username = session.get('username')
@@ -224,7 +253,6 @@ def user_records_detailed_page():
 def terms_and_conditions_page():
 
     username = session.get('username')
-
     return render_template('terms_and_conditions.html', username=username)
 
 @app.route('/trip_ticket')

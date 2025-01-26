@@ -127,7 +127,6 @@ td {
 
 .button-container {
     display: flex;
-    justify-content: center;
     margin-top: 30px;
 }
 
@@ -150,6 +149,23 @@ td {
 /* Hover effects for buttons */
 .addVehicle-button:hover {
     background-color: #009624;
+}
+
+.approve-button {
+    background-color: #00c853;
+}
+
+.deny-button {
+    background-color: #f44336;
+}
+
+/* Hover effects for buttons */
+.approve-button:hover {
+    background-color: #009624;
+}
+
+.deny-button:hover {
+    background-color: #d32f2f;
 }
 
 .modal {
@@ -196,4 +212,16 @@ td {
 
 .modal .button-container button {
     margin: 5px;
+}
+
+#add-vehicle-form {
+    display: none; 
+    overflow: hidden;
+    height: 0;
+    transition: height 0.3s ease-out; /* Smooth transition */
+}
+
+#add-vehicle-form.show {
+    display: block;
+    height: auto; /* Allow the height to adjust */
 }

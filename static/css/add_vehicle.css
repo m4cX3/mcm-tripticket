@@ -45,6 +45,7 @@ body {
 .main-content {
     margin-left: 270px;
     padding: 20px;
+    color: white
 }
 
 /* Section headers */
@@ -60,8 +61,7 @@ h1, h2, h3 {
     color: white;
     border-radius: 10px;
     margin-bottom: 20px;
-    display: flex;
-    justify-content: space-between;
+    font-size: 20px;
 }
 
 .summary-box ul {
@@ -142,14 +142,21 @@ td {
     transition: background-color 0.3s;
 }
 
-.addVehicle-button {
-    background-color: #000000;
+.approve-button {
+    background-color: #00c853;
 }
 
+.deny-button {
+    background-color: #f44336;
+}
 
 /* Hover effects for buttons */
-.addVehicle-button:hover {
+.approve-button:hover {
     background-color: #009624;
+}
+
+.deny-button:hover {
+    background-color: #d32f2f;
 }
 
 .modal {

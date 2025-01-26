@@ -1,4 +1,5 @@
 from flask import Flask, request
+from configuration.sql_connections import get_vehicle_id_from_name
 
 app = Flask(__name__)
 
@@ -34,7 +35,6 @@ def mcm_vehicle():
             selected_vehicles.append((vehicle_name, quantity))
 
     return selected_vehicles
-
 
 
 def mcm_details():
@@ -86,3 +86,67 @@ def submitform():
         }
 
     return form_data
+
+def insert_vehicle():
+    # Get form data
+    vehicleName = request.form.get('vehicleName')
+    vehicleQuantity = request.form.get('vehicleQuantity')
+    vehicleSeatingCapacity = request.form.get('vehicleSeatingCapacity')
+    vehicleImage = request.files.get('vehicleImage')  # Use request.files for file uploads
+    
+    # Initialize form data dictionary
+    form_data = {}
+
+    # Handle the vehicle image (store as binary data if image is provided)
+    if vehicleImage:
+        img_data = vehicleImage.read()  # Read the image data as binary
+    else:
+        img_data = None  # No image uploaded, set to None
+
+    # Populate form_data dictionary with form inputs
+    form_data = {
+        'vehicleName': vehicleName,
+        'vehicleQuantity': vehicleQuantity,
+        'vehicleSeatingCapacity': vehicleSeatingCapacity,
+        'vehicleImage': img_data  # Store binary image data
+    }
+
+    return form_data  # Return the form data for debugging or further processing
+
+def insert_specific_vehicle():
+    # Get form data
+    vehiclePlateNumber = request.form.get('vehiclePlateNumber')
+    vehicleDriver = request.form.get('vehicleDriver')
+    vehicleImage = request.files.get('vehicleImage')  # Use request.files for file uploads
+    vehicleName = request.form.get('vehicle_name')  # Get the vehicle name from the hidden input field
+
+    # Get vehicleID from mcm_listvehicles based on vehicle_name
+    vehicleID = get_vehicle_id_from_name(vehicleName)
+    
+    if not vehicleID:
+        print("Error: VehicleID not found for the given vehicle name.")
+        return None  # If vehicleID is not found, return None to indicate failure
+    
+    # Initialize form data dictionary
+    form_data = {}
+
+    # Handle the vehicle image (store as binary data if image is provided)
+    if vehicleImage:
+        img_data = vehicleImage.read()  # Read the image data as binary
+    else:
+        img_data = None  # No image uploaded, set to None
+
+    # Populate form_data dictionary with form inputs
+    form_data = {
+        'vehiclePlateNumber': vehiclePlateNumber,
+        'vehicleDriver': vehicleDriver,
+        'vehicleImage': img_data,  # Store binary image data
+        'vehicleName': vehicleName,  # Store the vehicle name (string)
+        'vehicleID': vehicleID  # Add the vehicleID
+    }
+
+    return form_data  # Return the form data for further processing
+
+
+
+

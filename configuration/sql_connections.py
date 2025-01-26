@@ -1,4 +1,4 @@
-from flask import session, request, jsonify
+from flask import session, request
 import mysql.connector
 from mysql.connector import Error
 import base64
@@ -155,6 +155,86 @@ def insert_mcm_data(form_data, user_id):
         if connection:
             connection.close()
 
+def add_vehicle(form_data):
+    try:
+        connection = config_connection()
+        cursor = connection.cursor()
+
+        insert_vehicle_query = """
+            INSERT INTO mcm_listvehicles (VehicleName, VehicleQuantity, VehicleSeatingCapacity, VehicleImage)
+            VALUES (%s, %s, %s, %s)
+        """
+        cursor.execute(insert_vehicle_query, (
+            form_data['vehicleName'],
+            form_data['vehicleQuantity'],
+            form_data['vehicleSeatingCapacity'],
+            form_data['vehicleImage']
+        ))
+        connection.commit()
+
+        print("Vehicle added successfully!")
+
+    except Exception as e:
+        print(f"Error adding vehicle: {str(e)}")
+
+    finally:
+        if cursor:
+            cursor.close()
+        if connection:
+            connection.close()
+
+def get_vehicle_id_from_name(vehicle_name):
+    try:
+        connection = config_connection()
+        cursor = connection.cursor()
+
+        query = "SELECT VehicleID FROM mcm_listvehicles WHERE VehicleName = %s"
+        cursor.execute(query, (vehicle_name,))
+        result = cursor.fetchone()
+
+        if result:
+            return result[0]  # Return the VehicleID
+        else:
+            return None  # Return None if no match is found
+
+    except Exception as e:
+        print(f"Error fetching VehicleID: {str(e)}")
+        return None
+
+    finally:
+        if cursor:
+            cursor.close()
+        if connection:
+            connection.close()
+
+
+def add_specific_vehicle(form_data):
+    try:
+        print("Inserting vehicle data into the database...")
+        connection = config_connection()  # Make sure this function correctly sets up your DB connection
+        cursor = connection.cursor()
+
+        insert_vehicle_query = """
+            INSERT INTO mcm_vehicles (VehicleID, VehiclePlateNumber, VehicleDriver, VehicleImage, VehicleName)
+            VALUES (%s, %s, %s, %s, %s)
+        """
+        cursor.execute(insert_vehicle_query, (
+            form_data['vehicleID'],  # Insert the VehicleID
+            form_data['vehiclePlateNumber'],
+            form_data['vehicleDriver'],
+            form_data['vehicleImage'],  # Insert the binary image data
+            form_data['vehicleName'],  # Insert the vehicle name (string)
+        ))
+        connection.commit()
+        print("Vehicle added successfully!")
+    except Exception as e:
+        print(f"Error adding vehicle: {str(e)}")
+    finally:
+        if cursor:
+            cursor.close()
+        if connection:
+            connection.close()
+
 
 def show_mcm_vehicles():
     try:
@@ -209,6 +289,39 @@ def show_mcm_vehicles():
             cursor.close()
         if connection:
             connection.close()
+
+def show_vehicles_detailed(vehicle_name=None):
+    try:
+        connection = config_connection()
+        cursor = connection.cursor(dictionary=True)
+        query = """
+            SELECT 
+                v.VehicleID, 
+                v.VehiclePlateNumber,
+                v.VehicleDriver,
+                vd.VehicleName,
+                v.VehicleImage
+            FROM 
+                mcm_vehicles v
+            INNER JOIN 
+                mcm_listvehicles vd ON v.VehicleID = vd.VehicleID
+            WHERE 
+                vd.VehicleName = %s
+        """
+        cursor.execute(query, (vehicle_name,))
+        result = cursor.fetchall()
+        
+        # Encode the image data
+        for row in result:
+            if row['VehicleImage']:
+                row['VehicleImage'] = base64.b64encode(row['VehicleImage']).decode('utf-8')
+
+        connection.close()
+        return result
+    except Exception as e:
+        print(f"Error retrieving vehicles: {str(e)}")
+        return []
+
 
 
 def show_records():
