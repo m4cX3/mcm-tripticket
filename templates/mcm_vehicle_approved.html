@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Form Summary</title>
+    <link href="https://fonts.googleapis.com/css?family=Poppins" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/mcm_vehicle_approved.css') }}" type="text/css">
+    <script>
+        function approveRequest(username, travelStartDate, vehicleType, requestedBy, vehicleName, vehiclePlateNumber, vehicleDriver) {
+            if (!vehicleName || vehicleName.trim() === "") {
+                alert("Vehicle name is required!");
+                return;
+            }
+            if (!vehiclePlateNumber || vehiclePlateNumber.trim() === "") {
+                alert("Vehicle plate number is required!");
+                return;
+            }
+        
+            const url = `/approve_request`;
+        
+            fetch(url, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    username: username,
+                    startDate: travelStartDate,
+                    vehicleType: vehicleType,
+                    requestedBy: requestedBy,
+                    vehicleName: vehicleName,
+                    vehiclePlateNumber: vehiclePlateNumber,
+                    vehicleDriver: vehicleDriver
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    alert('Request has been approved successfully!');
+                    window.location.href = `/admin_records?username=${encodeURIComponent(username)}`;
+                } else {
+                    alert(`Error approving request: ${data.error}`);
+                }
+            })
+            .catch(error => console.error('Error:', error));
+        }
+        
+
+        function onApproveButtonClick(username) {
+            const selectedCheckbox = document.querySelector('input[type="checkbox"]:checked');
+            if (selectedCheckbox) {
+                const row = selectedCheckbox.closest('tr');
+                const vehicleName = row.dataset.vehiclename;
+                const vehiclePlateNumber = row.dataset.plate;
+                const vehicleDriver = row.dataset.driver;
+
+                const travelStartDate = new URLSearchParams(window.location.search).get('start_date');
+                const vehicleType = new URLSearchParams(window.location.search).get('vehicle_type');
+                const requestedBy = new URLSearchParams(window.location.search).get('requested_by');
+
+                approveRequest(username, travelStartDate, vehicleType, requestedBy, vehicleName, vehiclePlateNumber, vehicleDriver);
+            } else {
+                alert('Please select a vehicle before approving.');
+            }
+        }
+
+        function toggleApproveButton() {
+            const checkboxes = document.querySelectorAll('input[type="checkbox"]');
+            const approveButton = document.getElementById('approve');
+            approveButton.style.display = Array.from(checkboxes).some(checkbox => checkbox.checked) ? 'block' : 'none';
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const checkboxes = document.querySelectorAll('input[type="checkbox"]');
+            checkboxes.forEach(checkbox => {
+                checkbox.addEventListener('change', toggleApproveButton);
+            });
+            toggleApproveButton(); // Initial check
+        });
+    </script>
+</head>
+<body>
+    <div class="sidebar">
+        <div class="badge-logo">
+            <img id="mcm" src="{{ url_for('static', filename='images/mmcm small logo.png') }}" alt="MMCM Logo">
+        </div>
+        <a href="{{ url_for('admin_dashboard_page', username=username) }}">Dashboard</a>
+        <a href="{{ url_for('admin_requests_page', username=username) }}">Requests</a>
+        <a href="{{ url_for('admin_records_page', username=username) }}">Records</a>
+        <a href="{{ url_for('admin_vehicles_page', username=username) }}">Vehicles</a>
+        <br><br>
+        <a href="{{ url_for('login_page') }}">Log Out</a>
+    </div>
+
+    <div class="main-content">
+        <h1>Chosen Vehicle: {{ vehicle_name }}</h1>
+        <h3>Please choose a car.</h3>
+        <br>
+        <h3>Models:</h3>
+        <div class="details-box">
+            <table>
+                <thead>
+                    <tr class="header-row">
+                        <th></th>
+                        <th>Plate Number</th>
+                        <th>Driver Assigned</th>
+                        <th>Vehicle Image</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% if details %}
+                        {% for vehicle in details %}
+                            <tr data-vehiclename="{{ vehicle.VehicleName }}" data-plate="{{ vehicle.VehiclePlateNumber }}" data-driver="{{ vehicle.VehicleDriver }}">
+                                <td><input type="checkbox"></td>
+                                <td>{{ vehicle.VehiclePlateNumber }}</td>
+                                <td>{{ vehicle.VehicleDriver }}</td>
+                                <td>
+                                    <img src="data:image/jpeg;base64,{{ vehicle.VehicleImage }}" alt="{{ vehicle.VehicleName }}" style="max-width: 200px; max-height: 200px;">
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    {% else %}
+                        <tr>
+                            <td colspan="4" style="text-align: center;">No vehicles available</td>
+                        </tr>
+                    {% endif %}
+                </tbody>
+            </table>
+        </div>
+        <div class="button-container">
+            <input type="button" id="approve" name="approve" value="Approve" class="approve-button" onclick="onApproveButtonClick('{{ username }}')" style="display: none;">
+        </div>
+        <a href="{{ url_for('admin_dashboard_page', username=username) }}">Back to Dashboard</a>
+    </div>
+</body>
+</html>

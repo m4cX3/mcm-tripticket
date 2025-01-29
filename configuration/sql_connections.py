@@ -1,4 +1,4 @@
-from flask import session, request
+from flask import session, request, jsonify
 import mysql.connector
 from mysql.connector import Error
 import base64
@@ -106,11 +106,11 @@ def insert_mcm_data(form_data, user_id):
             form_data['purpose'],
             form_data['vehicle'],
         ))
-        
-        # Get the last inserted ID (primary key for ticketform_own)
+
+        # Get the last inserted ID (primary key for mcm_ticketform)
         mcm_ticketformid = cursor.lastrowid
 
-        # Insert vehicle details into a separate table or ensure vehicle details are handled correctly
+        # Insert vehicle details into mcm_vehicledetails
         for vehicle in form_data['mcmVehicles']:
             cursor.execute(''' 
                 SELECT VehicleID FROM mcm_listvehicles WHERE VehicleName = %s
@@ -121,7 +121,7 @@ def insert_mcm_data(form_data, user_id):
                 vehicle_id = vehicle_result[0]  # Get the vehicleID from the result
                 print(f"Found VehicleID: {vehicle_id} for VehicleName: {vehicle['name']}")
                 
-                # Instead of an update, consider inserting into a separate table for vehicle details
+                # Insert vehicle details into mcm_vehicledetails
                 cursor.execute(''' 
                     INSERT INTO mcm_vehicledetails (FormID, VehicleID, VehicleName, VehicleQuantity)
                     VALUES (%s, %s, %s, %s)
@@ -129,7 +129,7 @@ def insert_mcm_data(form_data, user_id):
             else:
                 print(f"Vehicle '{vehicle['name']}' not found. Skipping this vehicle.")
 
-        # Insert travel details into `mcm_traveldetails`
+        # Insert travel details into mcm_traveldetails
         for travel in form_data['travel_details']:
             start_date, start_time, estimated_return, destination = travel
             
@@ -154,6 +154,8 @@ def insert_mcm_data(form_data, user_id):
             cursor.close()
         if connection:
             connection.close()
+
+
 
 def add_vehicle(form_data):
     try:
@@ -241,7 +243,7 @@ def show_mcm_vehicles():
         connection = config_connection()
         cursor = connection.cursor(dictionary=True)
 
-        # Updated SQL query
+        # Updated SQL query to check vehicleisused on mcm_vehicles
         query = """
             SELECT 
                 v.VehicleID, 
@@ -249,11 +251,13 @@ def show_mcm_vehicles():
                 v.VehicleQuantity, 
                 v.VehicleSeatingCapacity, 
                 v.VehicleImage,
-                COUNT(CASE WHEN t.Approval = 1 OR (t.Approval = 0 AND t.Remarks IS NOT NULL) THEN vd.VehicleID END) AS UsedQuantity
+                SUM(CASE WHEN mv.VehicleIsUsed = 1 THEN 1 ELSE 0 END) AS UsedQuantity  -- Reference VehicleIsUsed from mcm_vehicles
             FROM 
                 mcm_listvehicles v
             LEFT JOIN 
                 mcm_vehicledetails vd ON v.VehicleID = vd.VehicleID
+            LEFT JOIN 
+                mcm_vehicles mv ON mv.VehicleID = v.VehicleID  -- Join with mcm_vehicles to check VehicleIsUsed
             LEFT JOIN 
                 mcm_ticketform t ON t.FormID = vd.FormID
             GROUP BY 
@@ -266,15 +270,20 @@ def show_mcm_vehicles():
         cursor.execute(query)
         vehicles = cursor.fetchall()
 
-        # Debug output to check fetched vehicles
+        # Debug output to check the fetched vehicles and query
+        print("Executed Query:", query)  # Print the query to ensure it's correct
         print("Fetched Vehicles:", vehicles)  # Check the output here
 
-        # Calculate available quantity considering approval and remarks
+        # If no vehicles are fetched, print a message
+        if not vehicles:
+            print("No vehicles found in the database!")
+
+        # Calculate available quantity considering vehicleisused
         for vehicle in vehicles:
             if vehicle['VehicleImage']:
                 vehicle['VehicleImage'] = base64.b64encode(vehicle['VehicleImage']).decode('utf-8')
-            
-            # Start with the used quantity from count
+
+            # Start with the used quantity based on vehicleisused
             used_quantity = int(vehicle['UsedQuantity'])
             vehicle['AvailableQuantity'] = int(vehicle['VehicleQuantity']) - used_quantity
 
@@ -289,6 +298,8 @@ def show_mcm_vehicles():
             cursor.close()
         if connection:
             connection.close()
+
+
 
 def show_vehicles_detailed(vehicle_name=None):
     try:
@@ -321,8 +332,6 @@ def show_vehicles_detailed(vehicle_name=None):
     except Exception as e:
         print(f"Error retrieving vehicles: {str(e)}")
         return []
-
-
 
 def show_records():
     try:
@@ -572,73 +581,290 @@ def deny_form():
 
 def approve_form():
     try:
-        # Retrieve query parameters from the URL
-        start_date = request.args.get('start_date')
-        vehicle_type = request.args.get('vehicle_type')
-        requested_by = request.args.get('requested_by')
+        # Parse incoming JSON data
+        data = request.get_json()
+        vehicle_name = data.get('vehicleName')
+        vehicle_plate_number = data.get('vehiclePlateNumber')
+        vehicle_driver = data.get('vehicleDriver')
+        start_date = data.get('startDate')
+        vehicle_type = data.get('vehicleType')
+        requested_by = data.get('requestedBy')
 
-        # Log the received parameters
-        print(f"Start Date: {start_date}, Vehicle Type: {vehicle_type}, Requested By: {requested_by}")
-
-        # Log if parameters are None
-        if not start_date or not vehicle_type or not requested_by:
-            return {"success": False, "error": "Missing parameters in URL."}
+        # Check for missing fields
+        if not (vehicle_name and vehicle_plate_number and vehicle_driver and start_date and vehicle_type and requested_by):
+            return {"success": False, "error": "Missing parameters in request."}
 
         connection = config_connection()
         cursor = connection.cursor(dictionary=True)
 
-        # Get the request body data (username if needed)
-        data = request.get_json()
-        username = data.get('username')  # You can log this if needed
+        # Log the received data
+        print(f"Received Data: {data}")
 
+        # Query to get the VehicleID from mcm_vehicles based on VehicleName and VehiclePlateNumber
+        query = """
+            SELECT VehicleID
+            FROM mcm_vehicles
+            WHERE TRIM(LOWER(VehiclePlateNumber)) = TRIM(LOWER(%s)) 
+              AND TRIM(LOWER(VehicleName)) = TRIM(LOWER(%s))
+        """
+        print(f"Executing Query to fetch VehicleID: {query} with values: PlateNumber: '{vehicle_plate_number}', VehicleName: '{vehicle_name}'")
+        
+        cursor.execute(query, (vehicle_plate_number, vehicle_name))
+        vehicle_result = cursor.fetchone()
+
+        # Consume the result to avoid unread result error
+        cursor.fetchall()  # Add this to consume any remaining result set
+
+        # Check if the vehicle exists
+        if not vehicle_result:
+            return {"success": False, "error": f"Vehicle '{vehicle_name}' with plate number '{vehicle_plate_number}' not found."}
+
+        vehicle_id = vehicle_result['VehicleID']
+        print(f"Fetched VehicleID: {vehicle_id}")
+
+        # Now, use the VehicleID to fetch the FormID from mcm_vehicledetails and mcm_traveldetails
+        query_form_id = """
+            SELECT t.FormID
+            FROM mcm_vehicledetails d
+            JOIN mcm_traveldetails t ON d.FormID = t.FormID
+            WHERE d.VehicleID = %s
+        """
+        print(f"Executing Query to fetch FormID for VehicleID {vehicle_id}")
+        
+        cursor.execute(query_form_id, (vehicle_id,))
+        form_id_result = cursor.fetchone()
+
+        # Consume the result to avoid unread result error
+        cursor.fetchall()  # Add this to consume any remaining result set
+
+        # Check if FormID exists
+        if not form_id_result:
+            return {"success": False, "error": "No travel details found for this vehicle."}
+
+        form_id = form_id_result['FormID']
+        print(f"Fetched FormID: {form_id}")
+
+        # Update the ticket approval in mcm_ticketform and the start date in mcm_traveldetails
         if vehicle_type == 'Own Vehicle':
-            # Step 1: First, get the FormIDs that match the conditions
+            # Update mcm_ticketform for Own Vehicle
             cursor.execute("""
-                SELECT t.FormID FROM own_ticketform t
+                UPDATE own_ticketform t
                 JOIN own_traveldetails d ON t.FormID = d.FormID
+                SET t.Approval = 1 
                 WHERE d.StartDate = %s AND t.RequestedBy = %s
             """, (start_date, requested_by))
-            form_ids = cursor.fetchall()
-
-            # Step 2: Update only the matching FormIDs in the 'own_ticketform'
-            if form_ids:
-                form_ids = [form['FormID'] for form in form_ids]  # Extract FormID values
-                cursor.execute(f"""
-                    UPDATE own_ticketform 
-                    SET Approval = 1 
-                    WHERE FormID IN ({', '.join(['%s'] * len(form_ids))})
-                """, form_ids)
-        else:  # Assuming vehicle_type is 'MCM Vehicle'
-            cursor.execute("""
-                SELECT m.FormID FROM mcm_ticketform m
-                JOIN mcm_traveldetails md ON m.FormID = md.FormID
-                WHERE md.StartDate = %s AND m.RequestedBy = %s
-            """, (start_date, requested_by))
-            form_ids = cursor.fetchall()
-
-            if form_ids:
-                form_ids = [form['FormID'] for form in form_ids]
-                cursor.execute(f"""
-                    UPDATE mcm_ticketform 
-                    SET Approval = 1 
-                    WHERE FormID IN ({', '.join(['%s'] * len(form_ids))})
-                """, form_ids)
-
-        connection.commit()
-        affected_rows = cursor.rowcount
-        print(f"Affected rows: {affected_rows}")
-
-        if affected_rows > 0:
-            return {"success": True}
         else:
-            return {"success": False, "error": "No matching records found."}
+            # Update mcm_ticketform for MCM vehicle
+            cursor.execute("""
+                UPDATE mcm_ticketform t
+                JOIN mcm_traveldetails d ON t.FormID = d.FormID
+                SET t.Approval = 1 
+                WHERE d.StartDate = %s AND t.RequestedBy = %s
+            """, (start_date, requested_by))
+
+            # Update mcm_vehicledetails based on FormID for the vehicle
+            cursor.execute("""
+                UPDATE mcm_vehicledetails
+                SET VehiclePlateNumber = %s, VehicleDriver = %s
+                WHERE FormID = %s
+            """, (vehicle_plate_number, vehicle_driver, form_id))
+
+            # Mark the vehicle as used in mcm_vehicles table
+            cursor.execute("""
+                UPDATE mcm_vehicles
+                SET VehicleIsUsed = 1
+                WHERE VehicleID = %s
+            """, (vehicle_id,))
+
+        # Commit the transaction
+        connection.commit()
+        return {"success": True}
 
     except Exception as e:
-        print(f"Error approving the request: {str(e)}")
+        print("Error occurred:", str(e))
         return {"success": False, "error": str(e)}
+
+    finally:
+        if connection.is_connected():
+            cursor.close()
+            connection.close()
+
+def delete_entry():
+    try:
+        # Extract data from the request
+        data = request.json
+        username = data.get('username')
+        start_date = data.get('start_date')
+        vehicle_type = data.get('vehicle_type')
+        requested_by = data.get('requested_by')
+
+        # Validate required fields
+        if not all([username, start_date, vehicle_type, requested_by]):
+            return jsonify({"success": False, "error": "Missing required fields."}), 400
+
+        # Connect to the database
+        connection = config_connection()
+        cursor = connection.cursor(dictionary=True)
+
+        if vehicle_type == "Own Vehicle":
+            # Delete from own_traveldetails first
+            sql_delete_travel = """
+            DELETE otd
+            FROM own_traveldetails otd
+            INNER JOIN own_ticketform otf
+                ON otd.FormID = otf.FormID
+            WHERE otd.StartDate = %s AND otf.VehicleType = %s AND otf.RequestedBy = %s
+            """
+            cursor.execute(sql_delete_travel, (start_date, vehicle_type, requested_by))
+
+            # Then delete from own_ticketform
+            sql_delete_ticket = """
+            DELETE FROM own_ticketform
+            WHERE VehicleType = %s AND RequestedBy = %s AND StartDate = %s
+            """
+            cursor.execute(sql_delete_ticket, (vehicle_type, requested_by, start_date))
+
+        else:  # For MCM vehicles
+            # Step 1: Fetch FormIDs to delete
+            sql_get_form_ids = """
+            SELECT mtd.FormID
+            FROM mcm_traveldetails mtd
+            INNER JOIN mcm_ticketform mtf
+                ON mtd.FormID = mtf.FormID
+            WHERE mtd.StartDate = %s AND mtf.VehicleType = %s AND mtf.RequestedBy = %s
+            """
+            cursor.execute(sql_get_form_ids, (start_date, vehicle_type, requested_by))
+            form_ids = cursor.fetchall()
+
+            if not form_ids:
+                return jsonify({"success": False, "error": "Entry not found."}), 404
+
+            form_id_list = [row["FormID"] for row in form_ids]
+
+            # Step 2: Delete from mcm_vehicledetails
+            sql_delete_vehicle_details = """
+            DELETE FROM mcm_vehicledetails
+            WHERE FormID IN (%s)
+            """ % ', '.join(['%s'] * len(form_id_list))
+            cursor.execute(sql_delete_vehicle_details, form_id_list)
+
+            # Step 3: Delete from mcm_traveldetails
+            sql_delete_travel = """
+            DELETE FROM mcm_traveldetails
+            WHERE FormID IN (%s)
+            """ % ', '.join(['%s'] * len(form_id_list))
+            cursor.execute(sql_delete_travel, form_id_list)
+
+            # Step 4: Delete from mcm_ticketform
+            sql_delete_ticket = """
+            DELETE FROM mcm_ticketform
+            WHERE FormID IN (%s)
+            """ % ', '.join(['%s'] * len(form_id_list))
+            cursor.execute(sql_delete_ticket, form_id_list)
+
+        connection.commit()
+
+        # Check if rows were affected
+        if cursor.rowcount > 0:
+            return jsonify({"success": True})
+        else:
+            return jsonify({"success": False, "error": "Entry not found."}), 404
+
+    except Exception as e:
+        print("Error deleting entry:", e)
+        return jsonify({"success": False, "error": str(e)}), 500
 
     finally:
         if cursor:
             cursor.close()
         if connection:
             connection.close()
+
+def cancel_entry():
+    try:
+        data = request.json
+        username = data.get('username')
+        remarks = data.get('remarks')
+        start_date = request.args.get('start_date')
+        vehicle_type = request.args.get('vehicle_type')
+        requested_by = request.args.get('requested_by')
+
+        if not all([username, remarks, start_date, vehicle_type, requested_by]):
+            return jsonify({"success": False, "error": "Missing required fields."}), 400
+
+        connection = config_connection()
+        cursor = connection.cursor(dictionary=True)
+
+        if vehicle_type == "Own Vehicle":
+            sql = """
+            SELECT ot.FormID
+            FROM own_traveldetails otd
+            JOIN own_ticketform ot ON otd.FormID = ot.FormID
+            WHERE otd.StartDate = %s AND ot.RequestedBy = %s
+            """
+            cursor.execute(sql, (start_date, requested_by))
+            result = cursor.fetchone()
+
+            if result is None:
+                return jsonify({"success": False, "error": "Travel details not found."}), 404
+
+            form_id = result['FormID']
+
+            update_sql = """
+            UPDATE own_ticketform
+            SET Approval = 0, Remarks = %s
+            WHERE FormID = %s
+            """
+            cursor.execute(update_sql, (remarks, form_id))
+
+        else:
+            sql = """
+            SELECT mt.FormID, v.VehicleName, v.VehiclePlateNumber, v.VehicleDriver
+            FROM mcm_traveldetails mtd
+            JOIN mcm_ticketform mt ON mtd.FormID = mt.FormID
+            JOIN mcm_vehicledetails v ON v.FormID = mt.FormID
+            WHERE mtd.StartDate = %s AND mt.RequestedBy = %s
+            """
+            cursor.execute(sql, (start_date, requested_by))
+            result = cursor.fetchone()
+
+            if result is None:
+                return jsonify({"success": False, "error": "Travel details not found."}), 404
+
+            form_id = result['FormID']
+            vehicle_name = result['VehicleName']
+            plate_number = result['VehiclePlateNumber']
+            driver_name = result['VehicleDriver']
+
+            update_sql = """
+            UPDATE mcm_ticketform
+            SET Approval = 0, Remarks = %s
+            WHERE FormID = %s
+            """
+            cursor.execute(update_sql, (remarks, form_id))
+
+            # Update the vehicle usage in mcm_vehicles based on extracted driver and plate number
+            is_used_sql = """
+            UPDATE mcm_vehicles
+            SET VehicleIsUsed = 0
+            WHERE VehicleName = %s AND VehiclePlateNumber = %s AND VehicleDriver = %s
+            """
+            cursor.execute(is_used_sql, (vehicle_name, plate_number, driver_name))
+
+        connection.commit()
+
+        if cursor.rowcount > 0:
+            return jsonify({"success": True})
+        else:
+            return jsonify({"success": False, "error": "Request not found."}), 404
+
+    except Exception as e:
+        print("Error canceling request:", e)
+        return jsonify({"success": False, "error": str(e)}), 500
+
+    finally:
+        if cursor:
+            cursor.close()
+        if connection:
+            connection.close()
+

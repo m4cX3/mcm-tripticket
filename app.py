@@ -155,6 +155,30 @@ def admin_requests_page():
 
     return render_template('admin_requests.html', records=records, username=username)
 
+@app.route('/mcm_vehicle_approved', methods=['GET'])
+def mcm_vehicle_approved_page():
+    username = session.get('username')
+    
+    start_date = request.args.get('start_date')
+    vehicle_type = request.args.get('vehicle_type')
+    requested_by = request.args.get('requested_by')
+    vehicle_name = request.args.get('vehicle_name')
+    
+    form_details = show_specific_record()
+    complete_details = show_vehicles_detailed(vehicle_name)
+
+    return render_template(
+        'mcm_vehicle_approved.html', 
+        form_details=form_details, 
+        details=complete_details, 
+        username=username,
+        start_date=start_date, 
+        vehicle_type=vehicle_type, 
+        requested_by=requested_by, 
+        vehicle_name=vehicle_name
+    )
+
+
 @app.route('/admin_records_detailed', methods=['GET', 'POST'])
 def admin_records_detailed_page():
     
@@ -165,7 +189,10 @@ def admin_records_detailed_page():
     requested_by = request.args.get('requested_by')
 
     complete_details = show_specific_record()
-    print(complete_details)
+    if request.method == 'POST':
+        vehicle_data = complete_details
+        return redirect(url_for('mcm_vehicle_approved_page', username=username, vehicle_data=vehicle_data))
+    
     return render_template('admin_records_detailed.html', details=complete_details, username=username,
                            start_date=start_date, vehicle_type=vehicle_type, requested_by=requested_by)
 
@@ -293,6 +320,10 @@ def insert_own_form_to_database():
 
     print(f"UserID for username {username}: {user_id}")
 
+    if user_id == 'admin':
+        insert_own_data(form_data, user_id)
+        return redirect(url_for('admin_requests_page', username=username))
+    
     if user_id is not None:
         insert_own_data(form_data, user_id)
         return redirect(url_for('user_records_page', username=username))
@@ -316,6 +347,10 @@ def insert_mcm_form_to_database():
     
     print(f"UserID for username {username}: {user_id}")
 
+    if user_id == 'admin':
+        insert_mcm_data(form_data, user_id)
+        return redirect(url_for('admin_requests_page', username=username))
+    
     if user_id is not None:
         insert_mcm_data(form_data, user_id)
         return redirect(url_for('user_records_page', username=username))
@@ -331,6 +366,13 @@ def approve_form_request():
 def deny_form_request():
     return deny_form()
 
+@app.route('/delete_entry', methods=['POST'])
+def delete_entry_request():
+    return delete_entry()
+
+@app.route('/cancel_request', methods=['POST'])
+def cancel_entry_request():
+    return cancel_entry()
 
 if __name__ == '__main__':
     app.run(debug=True)

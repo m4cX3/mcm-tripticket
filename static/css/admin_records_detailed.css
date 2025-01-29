@@ -148,6 +148,10 @@ td {
     background-color: #f44336;
 }
 
+.delete-button {
+    background-color: #f44336;
+}
+
 /* Hover effects for buttons */
 .approve-button:hover {
     background-color: #009624;
@@ -155,6 +159,10 @@ td {
 
 .deny-button:hover {
     background-color: #d32f2f;
+}
+
+.delete-button:hover {
+    background-color: #f44336;
 }
 
 .modal {
