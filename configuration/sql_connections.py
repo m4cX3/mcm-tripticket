@@ -529,3 +529,32 @@ def approve_form():
             cursor.close()
         if connection:
             connection.close()
+
+def show_approved_records():
+    try:
+        connection = config_connection()
+        cursor = connection.cursor(dictionary=True)
+
+        # Fetch only approved records with StartDate
+        cursor.execute(""" 
+            SELECT md.StartDate, m.RequestedBy, 'MCM Vehicle' AS VehicleType
+            FROM mcm_ticketform m
+            JOIN mcm_traveldetails md ON m.FormID = md.FormID
+            WHERE m.Approval = 1
+            UNION ALL
+            SELECT d.StartDate, t.RequestedBy, 'Own Vehicle' AS VehicleType
+            FROM own_ticketform t
+            JOIN own_traveldetails d ON t.FormID = d.FormID
+            WHERE t.Approval = 1
+        """)
+
+        approved_records = cursor.fetchall()
+        return approved_records
+    except Exception as e:
+        print(f"Error retrieving approved records: {str(e)}")
+        return []
+    finally:
+        if cursor:
+            cursor.close()
+        if connection:
+            connection.close()
