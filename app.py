@@ -303,6 +303,11 @@ def approve_form_request():
 def deny_form_request():
     return deny_form()
 
+@app.route('/calendar', methods=['GET'])
+def calendar_page():
+    username = session.get('username')
+    approved_records = show_approved_records()  # Fetch only approved records
+    return render_template('calendar.html', records=approved_records, username=username)
 
 if __name__ == '__main__':
     app.run(debug=True)
