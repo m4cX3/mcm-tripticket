@@ -10,7 +10,7 @@
             function onDeleteButtonClick(username) {
                 if (confirm("Are you sure you want to delete this entry?")) {
                     // Retrieve required details from the template context or URL
-                    const { startDate, vehicleType, requestedBy } = getUrlParams();
+                    const { formID, vehicleType, requestedBy } = getUrlParams();
             
                     // Make a DELETE request to the server
                     fetch(`/delete_entry`, {
@@ -20,7 +20,7 @@
                         },
                         body: JSON.stringify({
                             username: username,
-                            start_date: startDate,
+                            formID: formID,
                             vehicle_type: vehicleType,
                             requested_by: requestedBy,
                         }),
@@ -38,7 +38,7 @@
                 }
             }
 
-            function denyRequest(username, travelStartDate, vehicleType, requestedBy) {
+            function denyRequest(username, formID, vehicleType, requestedBy) {
                 var remarks = prompt("Enter remarks for denial:");
                 if (remarks === null) {
                     return; // User clicked "Cancel"
@@ -48,8 +48,8 @@
                     return;
                 }
             
-                // Construct the URL with parameters
-                const url = `/deny_request?start_date=${encodeURIComponent(travelStartDate)}&vehicle_type=${encodeURIComponent(vehicleType)}&requested_by=${encodeURIComponent(requestedBy)}`;
+                // Construct the URL with formID instead of startDate for denial
+                const url = `/deny_request?form_id=${encodeURIComponent(formID)}&vehicle_type=${encodeURIComponent(vehicleType)}&requested_by=${encodeURIComponent(requestedBy)}`;
             
                 fetch(url, {
                     method: 'POST',
@@ -67,11 +67,18 @@
                         alert('Request has been Denied');
                         window.location.href = '/admin_records?username=' + encodeURIComponent(username);  // Redirect to requests page after denying
                     } else {
-                        alert('Error denying request');
+                        alert('Error denying request: ' + data.error);
                     }
                 })
                 .catch(error => console.error('Error:', error));
             }
+            
+            // Event handler for the deny button
+            function onDenyButtonClick(username) {
+                const { formID, vehicleType, requestedBy } = getUrlParams(); // Fetch formID from the URL
+                denyRequest(username, formID, vehicleType, requestedBy); // Pass formID to denyRequest
+            }
+
             
             function cancelRequest(username, travelStartDate, vehicleType, requestedBy) {
                 var remarks = prompt("Enter remarks for cancellation:");
@@ -111,28 +118,28 @@
             // Extract URL parameters
             function getUrlParams() {
                 const urlParams = new URLSearchParams(window.location.search);
-                const startDate = urlParams.get('start_date');
+                const formID = urlParams.get('form_id');
                 const vehicleType = urlParams.get('vehicle_type');
                 const requestedBy = urlParams.get('requested_by');
                 
-                console.log(startDate, vehicleType, requestedBy); // Debugging to check values
+                console.log(formID, vehicleType, requestedBy); // Debugging to check values
                 
-                return { startDate, vehicleType, requestedBy };
+                return { formID, vehicleType, requestedBy };
             }
 
-            // Event handler for the deny button
-            function onDenyButtonClick(username) {
-                const { startDate, vehicleType, requestedBy } = getUrlParams();
-                denyRequest(username, startDate, vehicleType, requestedBy);
-            }
+           
 
-            function approveRequest(username, travelStartDate, vehicleType, requestedBy, vehicleName) {
+            function approveRequest(username, formID, vehicleType, requestedBy, vehicleName) {
+                let url;
+            
                 if (vehicleType === "MCM Vehicle") {
-                    // Redirect to the approved page with the vehicle_name in the URL path
-                    const url = `/mcm_vehicle_approved?start_date=${encodeURIComponent(travelStartDate)}&vehicle_type=${encodeURIComponent(vehicleType)}&requested_by=${encodeURIComponent(requestedBy)}&vehicle_name=${encodeURIComponent(vehicleName)}`;
+                    // Redirect to the approved page with the formID in the URL path
+                    url = `/mcm_vehicle_approved?form_id=${encodeURIComponent(formID)}&vehicle_type=${encodeURIComponent(vehicleType)}&requested_by=${encodeURIComponent(requestedBy)}&vehicle_name=${encodeURIComponent(vehicleName)}`;
                     window.location.href = url;
                 } else if (vehicleType === "Own Vehicle") {
-                    const url = `/approve_request?start_date=${encodeURIComponent(travelStartDate)}&vehicle_type=${encodeURIComponent(vehicleType)}&requested_by=${encodeURIComponent(requestedBy)}`;
+                    // Send the POST request to approve the own vehicle, passing formID instead of startDate
+                    url = `/approve_own_request?form_id=${encodeURIComponent(formID)}&vehicle_type=${encodeURIComponent(vehicleType)}&requested_by=${encodeURIComponent(requestedBy)}`;
+            
                     fetch(url, {
                         method: 'POST',
                         headers: {
@@ -156,18 +163,16 @@
             }
             
             function onApproveButtonClick(username) {
-                // Retrieve vehicle name from the template context
                 const vehicleName = "{{ details[0]['VehicleName'] | safe }}"; // Use | safe to prevent escaping issues
-                const { startDate, vehicleType, requestedBy } = getUrlParams();
+                const { formID, vehicleType, requestedBy } = getUrlParams(); // Change to get formID from URL params
             
                 if (vehicleName) {
-                    // Call the approveRequest function with valid parameters
-                    approveRequest(username, startDate, vehicleType, requestedBy, vehicleName);
+                    approveRequest(username, formID, vehicleType, requestedBy, vehicleName);
                 } else {
                     console.error('Vehicle name is not available.'); // Debugging log
                     alert('Vehicle details are missing, unable to approve.');
                 }
-            }
+            }            
         </script>
     </head>
     <body>

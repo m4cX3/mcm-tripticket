@@ -7,7 +7,7 @@
     <link href="https://fonts.googleapis.com/css?family=Poppins" rel="stylesheet">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/mcm_vehicle_approved.css') }}" type="text/css">
     <script>
-        function approveRequest(username, travelStartDate, vehicleType, requestedBy, vehicleName, vehiclePlateNumber, vehicleDriver) {
+        function approveRequest(username, formID, vehicleType, requestedBy, vehicleName, vehiclePlateNumber, vehicleDriver) {
             if (!vehicleName || vehicleName.trim() === "") {
                 alert("Vehicle name is required!");
                 return;
@@ -16,9 +16,9 @@
                 alert("Vehicle plate number is required!");
                 return;
             }
-        
-            const url = `/approve_request`;
-        
+    
+            const url = `/approve_mcm_request`;
+    
             fetch(url, {
                 method: 'POST',
                 headers: {
@@ -26,7 +26,7 @@
                 },
                 body: JSON.stringify({
                     username: username,
-                    startDate: travelStartDate,
+                    formID: formID,
                     vehicleType: vehicleType,
                     requestedBy: requestedBy,
                     vehicleName: vehicleName,
@@ -45,8 +45,7 @@
             })
             .catch(error => console.error('Error:', error));
         }
-        
-
+    
         function onApproveButtonClick(username) {
             const selectedCheckbox = document.querySelector('input[type="checkbox"]:checked');
             if (selectedCheckbox) {
@@ -54,23 +53,27 @@
                 const vehicleName = row.dataset.vehiclename;
                 const vehiclePlateNumber = row.dataset.plate;
                 const vehicleDriver = row.dataset.driver;
-
-                const travelStartDate = new URLSearchParams(window.location.search).get('start_date');
-                const vehicleType = new URLSearchParams(window.location.search).get('vehicle_type');
-                const requestedBy = new URLSearchParams(window.location.search).get('requested_by');
-
-                approveRequest(username, travelStartDate, vehicleType, requestedBy, vehicleName, vehiclePlateNumber, vehicleDriver);
+    
+                // Improved formID retrieval from URL
+                const urlParams = new URLSearchParams(window.location.search);
+                const formID = urlParams.get('form_id');  // Retrieve the 'form_id' parameter
+                console.log('Form ID:', formID);  // Log for verification
+    
+                const vehicleType = urlParams.get('vehicle_type');
+                const requestedBy = urlParams.get('requested_by');
+    
+                approveRequest(username, formID, vehicleType, requestedBy, vehicleName, vehiclePlateNumber, vehicleDriver);
             } else {
                 alert('Please select a vehicle before approving.');
             }
         }
-
+    
         function toggleApproveButton() {
             const checkboxes = document.querySelectorAll('input[type="checkbox"]');
             const approveButton = document.getElementById('approve');
             approveButton.style.display = Array.from(checkboxes).some(checkbox => checkbox.checked) ? 'block' : 'none';
         }
-
+    
         document.addEventListener('DOMContentLoaded', () => {
             const checkboxes = document.querySelectorAll('input[type="checkbox"]');
             checkboxes.forEach(checkbox => {
@@ -79,6 +82,7 @@
             toggleApproveButton(); // Initial check
         });
     </script>
+    
 </head>
 <body>
     <div class="sidebar">

@@ -8,10 +8,10 @@
   <link rel="stylesheet" href="{{ url_for('static', filename='css/user_records.css') }}" type="text/css">
   <title>User Records</title>
   <script>
-    function redirectToDetails(startDate, vehicleType, requestedBy) {
+    function redirectToDetails(formID, vehicleType, requestedBy) {
       // Redirect to the details page with query parameters
-      window.location.href = `/user_records_detailed?start_date=${encodeURIComponent(startDate)}&vehicle_type=${encodeURIComponent(vehicleType)}&requested_by=${encodeURIComponent(requestedBy)}`;
-    }
+      window.location.href = `/user_records_detailed?form_id=${encodeURIComponent(formID)}&vehicle_type=${encodeURIComponent(vehicleType)}&requested_by=${encodeURIComponent(requestedBy)}`;
+  }
   </script>
 </head>
 
@@ -59,7 +59,7 @@
         <tbody>
           {% for record in pending_records %}
             <tr class="pending-row"
-              onclick="redirectToDetails('{{ record['StartDate'] }}', '{{ record['VehicleType'] }}', '{{ record['RequestedBy'] }}')">
+              onclick="redirectToDetails('{{ record['FormID'] }}', '{{ record['VehicleType'] }}', '{{ record['RequestedBy'] }}')">
               <td>{{ record['DateFilled'] }}</td>
               <td>{{ record['RequestedBy'] }}</td>
               <td>{{ record['VehicleType'] }}</td>
@@ -94,7 +94,7 @@
         <tbody>
           {% for record in denied_records %}
             <tr class="denied-row"
-              onclick="redirectToDetails('{{ record['StartDate'] }}', '{{ record['VehicleType'] }}', '{{ record['RequestedBy'] }}')">
+              onclick="redirectToDetails('{{ record['FormID'] }}', '{{ record['VehicleType'] }}', '{{ record['RequestedBy'] }}')">
               <td>{{ record['DateFilled'] }}</td>
               <td>{{ record['RequestedBy'] }}</td>
               <td>{{ record['VehicleType'] }}</td>
@@ -129,7 +129,7 @@
         <tbody>
           {% for record in approved_records %}
             <tr class="data-row"
-              onclick="redirectToDetails('{{ record['StartDate'] }}', '{{ record['VehicleType'] }}', '{{ record['RequestedBy'] }}')">
+              onclick="redirectToDetails('{{ record['FormID'] }}', '{{ record['VehicleType'] }}', '{{ record['RequestedBy'] }}')">
               <td>{{ record['DateFilled'] }}</td>
               <td>{{ record['RequestedBy'] }}</td>
               <td>{{ record['VehicleType'] }}</td>

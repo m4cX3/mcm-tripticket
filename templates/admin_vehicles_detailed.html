@@ -47,9 +47,16 @@
     <div class="main-content">
         <h3>{{ vehicle_name }}</h3>  <!-- Display the vehicle name passed from the URL -->
         <br>
-        <!-- Button to toggle the Add Vehicle form -->
+        <!-- Display the vehicle count and max capacity -->
+        <p>Total Vehicles: {{ total_vehicles }} / {{ max_capacity }}</p>
+        <p>Remaining Slots: {{ max_capacity - total_vehicles }}</p>
+        <!-- Button to toggle the Add Vehicle form, hidden if the vehicle list is full -->
         <div class="button-container">
-            <input type="button" id="addVehicle" name="addVehicle" class="addVehicle-button" value="Add a Vehicle" onclick="toggleForm()">
+            {% if not is_full %}
+                <input type="button" id="addVehicle" name="addVehicle" class="addVehicle-button" value="Add a Vehicle" onclick="toggleForm()">
+            {% else %}
+                <p><strong>No more vehicles can be added (Max capacity reached).</strong></p>
+            {% endif %}
         </div>
         <br>
         <!-- Hidden form that will be toggled on click -->
@@ -82,6 +89,7 @@
                         <th>Plate Number</th>
                         <th>Driver Assigned</th>
                         <th>Vehicle Image</th>
+                        <th>Condition</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -93,12 +101,26 @@
                                 <td>
                                     <img src="data:image/jpeg;base64,{{ vehicle.VehicleImage }}" alt="{{ vehicle.VehicleName }}" style="max-width: 200px; max-height: 200px;">
                                 </td>
-                                <td> <input type=button id="delete" name="delete" value="Delete"></td>
+                                {% if vehicle.VehicleIsUsed == 1 %}
+                                <td style="background-color: rgb(255, 0, 0); color: white">Currently Used</td>
+                                {% endif %}
+                                {% if vehicle.VehicleIsUsed == 0 %}
+                                <td style="background-color: greenyellow">Available</td>
+                                {% endif %}
+                                <td>
+                                    <!-- Add a form for deleting the vehicle -->
+                                    <form action="{{ url_for('delete_vehicle', username=username, vehicle_name=vehicle_name) }}" method="POST" style="display: inline;">
+                                        <input type="hidden" name="vehicle_name" value="{{ vehicle_name }}">
+                                        <input type="hidden" name="plate_number" value="{{ vehicle.VehiclePlateNumber }}">
+                                        <input type="hidden" name="driver" value="{{ vehicle.VehicleDriver }}">
+                                        <button type="submit" class="delete-button">Delete</button>
+                                    </form>
+                                </td>
                             </tr>
                         {% endfor %}
                     {% else %}
                         <tr>
-                            <td colspan="3" style="text-align: center;">No vehicles available</td>
+                            <td colspan="5" style="text-align: center;">No vehicles available</td>
                         </tr>
                     {% endif %}
                 </tbody>

@@ -311,7 +311,8 @@ def show_vehicles_detailed(vehicle_name=None):
                 v.VehiclePlateNumber,
                 v.VehicleDriver,
                 vd.VehicleName,
-                v.VehicleImage
+                v.VehicleImage,
+                v.VehicleIsUsed
             FROM 
                 mcm_vehicles v
             INNER JOIN 
@@ -349,74 +350,17 @@ def show_records():
         user_id = user['UserId']  # Change from 'id' to 'UserId'
 
         # Fetch records from own_ticketform and mcm_ticketform, including the Remarks column
-        cursor.execute(""" 
-            SELECT t.DateFilled, t.RequestedBy, t.VehicleType, d.StartDate, d.Destinations, t.Approval, t.Remarks
+        cursor.execute("""  
+            SELECT t.FormID, t.DateFilled, t.RequestedBy, t.VehicleType, d.StartDate, d.Destinations, COALESCE(t.Approval, 0) AS Approval, t.Remarks
             FROM own_ticketform t
             JOIN own_traveldetails d ON t.FormID = d.FormID
             WHERE t.UserID = %s
             UNION ALL
-            SELECT m.DateFilled, m.RequestedBy, 'MCM Vehicle' AS VehicleType, md.StartDate, md.Destinations, m.Approval, m.Remarks
+            SELECT m.FormID, m.DateFilled, m.RequestedBy, 'MCM Vehicle' AS VehicleType, md.StartDate, md.Destinations, COALESCE(m.Approval, 0) AS Approval, m.Remarks
             FROM mcm_ticketform m
             JOIN mcm_traveldetails md ON m.FormID = md.FormID
             WHERE m.UserID = %s
         """, (user_id, user_id))
-
-        own_records = cursor.fetchall()
-
-        # Group records by StartDate, VehicleType, and Destinations
-        grouped_records = {}
-        for record in own_records:
-            # Create a unique key by combining StartDate, VehicleType, and RequestedBy
-            unique_key = (record['StartDate'], record['VehicleType'], record['RequestedBy'])
-            if unique_key not in grouped_records:
-                grouped_records[unique_key] = {
-                    'DateFilled': record['DateFilled'],
-                    'RequestedBy': record['RequestedBy'],
-                    'VehicleType': record['VehicleType'],
-                    'Destinations': [record['Destinations']],
-                    'Approval': record['Approval'],  # Add Approval field
-                    'Remarks': record['Remarks']      # Add Remarks field
-                }
-            else:
-                grouped_records[unique_key]['Destinations'].append(record['Destinations'])
-
-        # Prepare the final output
-        final_records = []
-        for (start_date, vehicle_type, requested_by), details in grouped_records.items():
-            first_destination = details['Destinations'][0]
-            additional_count = len(details['Destinations']) - 1
-            details['Destinations'] = f"{first_destination} +{additional_count}" if additional_count > 0 else first_destination
-            details['StartDate'] = start_date
-            details['VehicleType'] = vehicle_type
-            final_records.append(details)
-
-        return final_records
-    except Exception as e:
-        print(f"Error retrieving own_ticketform and mcm_ticketform data: {str(e)}")
-        return []
-    finally:
-        if cursor:
-            cursor.close()
-        if connection:
-            connection.close()
-
-
-
-def show_all_records():
-    try:
-        connection = config_connection()
-        cursor = connection.cursor(dictionary=True)
-
-        # Fetch all records from own_ticketform and mcm_ticketform (no filtering by user)
-        cursor.execute(""" 
-            SELECT t.DateFilled, t.RequestedBy, t.VehicleType, d.StartDate, d.Destinations, COALESCE(t.Approval, 0) AS Approval, t.Remarks
-            FROM own_ticketform t
-            JOIN own_traveldetails d ON t.FormID = d.FormID
-            UNION ALL
-            SELECT m.DateFilled, m.RequestedBy, 'MCM Vehicle' AS VehicleType, md.StartDate, md.Destinations, COALESCE(m.Approval, 0) AS Approval, m.Remarks
-            FROM mcm_ticketform m
-            JOIN mcm_traveldetails md ON m.FormID = md.FormID
-        """)
 
         own_records = cursor.fetchall()
 
@@ -427,12 +371,13 @@ def show_all_records():
             unique_key = (record['DateFilled'], record['StartDate'], record['VehicleType'], record['RequestedBy'])
             if unique_key not in grouped_records:
                 grouped_records[unique_key] = {
+                    'FormID': record['FormID'],  # Add FormID to grouped data
                     'DateFilled': record['DateFilled'],
                     'RequestedBy': record['RequestedBy'],
                     'VehicleType': record['VehicleType'],
                     'Destinations': [record['Destinations']],
-                    'Approval': record['Approval'],  # Add Approval field
-                    'Remarks': record['Remarks']      # Add Remarks field
+                    'Approval': record['Approval'],
+                    'Remarks': record['Remarks']
                 }
             else:
                 grouped_records[unique_key]['Destinations'].append(record['Destinations'])
@@ -460,47 +405,112 @@ def show_all_records():
 
 
 
-def show_specific_record():
+def show_all_records():
     try:
         connection = config_connection()
         cursor = connection.cursor(dictionary=True)
 
-        start_date = request.args.get('start_date')
-        vehicle_type = request.args.get('vehicle_type')
-        requested_by = request.args.get('requested_by')
+        # Fetch all records from own_ticketform and mcm_ticketform (no filtering by user)
+        cursor.execute("""
+            SELECT t.FormID, t.DateFilled, t.RequestedBy, t.VehicleType, d.StartDate, d.Destinations, COALESCE(t.Approval, 0) AS Approval, t.Remarks, 
+                   NULL AS VehicleName, NULL AS VehicleQuantity
+            FROM own_ticketform t
+            JOIN own_traveldetails d ON t.FormID = d.FormID
+            UNION ALL
+            SELECT m.FormID, m.DateFilled, m.RequestedBy, 'MCM Vehicle' AS VehicleType, md.StartDate, md.Destinations, COALESCE(m.Approval, 0) AS Approval, m.Remarks, 
+                   vd.VehicleName, vd.VehicleQuantity
+            FROM mcm_ticketform m
+            JOIN mcm_traveldetails md ON m.FormID = md.FormID
+            JOIN mcm_vehicledetails vd ON m.FormID = vd.FormID  -- Make sure this join includes the correct FormID from mcm_vehicledetails
+        """)
 
-        if vehicle_type == 'Own Vehicle':
-            cursor.execute(f"""
-                SELECT * FROM own_ticketform t
-                JOIN own_traveldetails d ON t.FormID = d.FormID
-                WHERE d.StartDate = %s AND t.RequestedBy = %s
-            """, (start_date, requested_by))
+        own_records = cursor.fetchall()
 
-            vehicle = cursor.fetchall()
-            
-            return vehicle
-        
-        else:  # Assuming vehicle_type is 'MCM Vehicle'
-            cursor.execute(f"""
-                SELECT * FROM mcm_ticketform m
-                JOIN mcm_traveldetails md ON m.FormID = md.FormID
-                JOIN mcm_vehicledetails v ON v.FormID = md.FormID
-                WHERE md.StartDate = %s AND m.RequestedBy = %s
-            """, (start_date, requested_by))
-            
-            vehicle = cursor.fetchall()
+        # Group records by DateFilled, StartDate, VehicleType, and RequestedBy
+        grouped_records = {}
+        for record in own_records:
+            # Debugging to check the record
+            print(record)  # Debugging line
 
-            return vehicle
-        
+            unique_key = (record['DateFilled'], record['StartDate'], record['VehicleType'], record['RequestedBy'])
+            if unique_key not in grouped_records:
+                grouped_records[unique_key] = {
+                    'FormID': record['FormID'],
+                    'DateFilled': record['DateFilled'],
+                    'RequestedBy': record['RequestedBy'],
+                    'VehicleType': record['VehicleType'],
+                    'Destinations': [record['Destinations']],
+                    'Approval': record['Approval'],
+                    'Remarks': record['Remarks'],
+                    'VehicleName': record['VehicleName'],  # Debugging line to check VehicleName for MCM vehicles
+                    'VehicleQuantity': record['VehicleQuantity'],  # Debugging line to check VehicleQuantity for MCM vehicles
+                }
+            else:
+                grouped_records[unique_key]['Destinations'].append(record['Destinations'])
+
+        # Debugging grouped records
+        print(grouped_records)  # Debugging line
+
+        # Prepare the final output
+        final_records = []
+        for (date_filled, start_date, vehicle_type, requested_by), details in grouped_records.items():
+            first_destination = details['Destinations'][0]
+            additional_count = len(details['Destinations']) - 1
+            details['Destinations'] = f"{first_destination} +{additional_count}" if additional_count > 0 else first_destination
+            details['StartDate'] = start_date
+            details['DateFilled'] = date_filled
+            details['VehicleType'] = vehicle_type
+            # Ensure VehicleName and VehicleQuantity are included for MCM
+            if vehicle_type == 'MCM Vehicle':
+                details['VehicleName'] = details['VehicleName']  # Ensure VehicleName is included for MCM
+                details['VehicleQuantity'] = details['VehicleQuantity']  # Ensure VehicleQuantity is included for MCM
+            final_records.append(details)
+
+        return final_records
     except Exception as e:
-        print(f"Error retrieving complete details: {str(e)}")
+        print(f"Error retrieving own_ticketform and mcm_ticketform data: {str(e)}")
         return []
-    
     finally:
         if cursor:
             cursor.close()
         if connection:
             connection.close()
+
+
+def show_specific_record(form_id, vehicle_type, requested_by):
+    try:
+        connection = config_connection()
+        cursor = connection.cursor(dictionary=True)
+
+        # Adjust query based on vehicle type
+        if vehicle_type == 'Own Vehicle':
+            cursor.execute("""
+                SELECT * FROM own_ticketform t
+                JOIN own_traveldetails d ON t.FormID = d.FormID
+                WHERE t.FormID = %s AND t.RequestedBy = %s
+            """, (form_id, requested_by))
+            vehicle = cursor.fetchall()
+        else:  # For MCM Vehicle
+            cursor.execute("""
+                SELECT * FROM mcm_ticketform m
+                JOIN mcm_traveldetails md ON m.FormID = md.FormID
+                JOIN mcm_vehicledetails vd ON m.FormID = vd.FormID
+                WHERE m.FormID = %s AND m.RequestedBy = %s
+            """, (form_id, requested_by))
+            vehicle = cursor.fetchall()
+
+        return vehicle
+        
+    except Exception as e:
+        print(f"Error retrieving complete details: {str(e)}")
+        return []
+    finally:
+        if cursor:
+            cursor.close()
+        if connection:
+            connection.close()
+
+
 
 def deny_form():
     try:
@@ -526,6 +536,9 @@ def deny_form():
         # Log received data
         print(f"Data received: {data}")
 
+        if not remarks:
+            return {"success": False, "error": "Remarks are required."}
+
         if vehicle_type == 'Own Vehicle':
             # Step 1: First, get the FormIDs that match the conditions
             cursor.execute("""
@@ -542,7 +555,8 @@ def deny_form():
                     UPDATE own_ticketform 
                     SET Remarks = %s 
                     WHERE FormID IN ({', '.join(['%s'] * len(form_ids))})
-                """, [remarks] + form_ids)
+                """, (remarks, *form_ids))  # Pass remarks and FormIDs
+
         else:  # Assuming vehicle_type is 'MCM Vehicle'
             cursor.execute("""
                 SELECT m.FormID FROM mcm_ticketform m
@@ -557,7 +571,7 @@ def deny_form():
                     UPDATE mcm_ticketform 
                     SET Remarks = %s 
                     WHERE FormID IN ({', '.join(['%s'] * len(form_ids))})
-                """, [remarks] + form_ids)
+                """, (remarks, *form_ids))  # Pass remarks and FormIDs
 
         connection.commit()
         affected_rows = cursor.rowcount
@@ -572,27 +586,24 @@ def deny_form():
         print(f"Error denying the request: {str(e)}")
         return {"success": False, "error": str(e)}
 
-    finally:
-        if cursor:
-            cursor.close()
-        if connection:
-            connection.close()
 
 
-def approve_form():
+def approve_mcm_form():
     try:
-        # Parse incoming JSON data
         data = request.get_json()
+        # Extract form_id from the JSON data using 'formID' key
+        form_id = data.get('formID')  # Corrected line
         vehicle_name = data.get('vehicleName')
         vehicle_plate_number = data.get('vehiclePlateNumber')
         vehicle_driver = data.get('vehicleDriver')
-        start_date = data.get('startDate')
         vehicle_type = data.get('vehicleType')
         requested_by = data.get('requestedBy')
 
-        # Check for missing fields
-        if not (vehicle_name and vehicle_plate_number and vehicle_driver and start_date and vehicle_type and requested_by):
+        # Check for missing fields including form_id
+        if not (vehicle_name and vehicle_plate_number and vehicle_driver and form_id and vehicle_type and requested_by):
             return {"success": False, "error": "Missing parameters in request."}
+
+            
 
         connection = config_connection()
         cursor = connection.cursor(dictionary=True)
@@ -644,37 +655,27 @@ def approve_form():
         form_id = form_id_result['FormID']
         print(f"Fetched FormID: {form_id}")
 
-        # Update the ticket approval in mcm_ticketform and the start date in mcm_traveldetails
-        if vehicle_type == 'Own Vehicle':
-            # Update mcm_ticketform for Own Vehicle
-            cursor.execute("""
-                UPDATE own_ticketform t
-                JOIN own_traveldetails d ON t.FormID = d.FormID
-                SET t.Approval = 1 
-                WHERE d.StartDate = %s AND t.RequestedBy = %s
-            """, (start_date, requested_by))
-        else:
-            # Update mcm_ticketform for MCM vehicle
-            cursor.execute("""
-                UPDATE mcm_ticketform t
-                JOIN mcm_traveldetails d ON t.FormID = d.FormID
-                SET t.Approval = 1 
-                WHERE d.StartDate = %s AND t.RequestedBy = %s
-            """, (start_date, requested_by))
+        # Update mcm_ticketform to set Approval = 1 based on form_id and requested_by
+        cursor.execute("""
+            UPDATE mcm_ticketform t
+            JOIN mcm_traveldetails d ON t.FormID = d.FormID
+            SET t.Approval = 1 
+            WHERE t.FormID = %s AND t.RequestedBy = %s
+        """, (form_id, requested_by))
 
-            # Update mcm_vehicledetails based on FormID for the vehicle
-            cursor.execute("""
-                UPDATE mcm_vehicledetails
-                SET VehiclePlateNumber = %s, VehicleDriver = %s
-                WHERE FormID = %s
-            """, (vehicle_plate_number, vehicle_driver, form_id))
+        # Update mcm_vehicledetails based on FormID for the vehicle
+        cursor.execute("""
+            UPDATE mcm_vehicledetails
+            SET VehiclePlateNumber = %s, VehicleDriver = %s
+            WHERE FormID = %s
+        """, (vehicle_plate_number, vehicle_driver, form_id))
 
-            # Mark the vehicle as used in mcm_vehicles table
-            cursor.execute("""
-                UPDATE mcm_vehicles
-                SET VehicleIsUsed = 1
-                WHERE VehicleID = %s
-            """, (vehicle_id,))
+        # Mark the vehicle as used in mcm_vehicles table
+        cursor.execute("""
+            UPDATE mcm_vehicles
+            SET VehicleIsUsed = 1
+            WHERE VehicleID = %s AND VehiclePlateNumber = %s AND VehicleDriver = %s
+        """, (vehicle_id, vehicle_plate_number, vehicle_driver))
 
         # Commit the transaction
         connection.commit()
@@ -684,101 +685,118 @@ def approve_form():
         print("Error occurred:", str(e))
         return {"success": False, "error": str(e)}
 
-    finally:
-        if connection.is_connected():
-            cursor.close()
-            connection.close()
+def approve_own_form():
+    try:
+        # Debug: print all query parameters
+        print(f"Query Parameters: {request.args}")
+
+        # Retrieve query parameters from the URL
+        form_id = request.args.get('form_id')
+        vehicle_type = request.args.get('vehicle_type')
+        requested_by = request.args.get('requested_by')
+
+        # Log the received parameters
+        print(f"Form ID: {form_id}, Vehicle Type: {vehicle_type}, Requested By: {requested_by}")
+
+        # Check if any of the parameters are None or missing
+        if form_id is None or vehicle_type is None or requested_by is None:
+            return {"success": False, "error": "Missing or invalid parameters in URL."}
+
+        connection = config_connection()
+        cursor = connection.cursor(dictionary=True)
+
+        # Step 1: Check if the formID exists in the 'own_ticketform' table based on the received form_id
+        cursor.execute("""
+            SELECT t.FormID FROM own_ticketform t
+            JOIN own_traveldetails d ON t.FormID = d.FormID
+            WHERE t.FormID = %s AND t.RequestedBy = %s
+        """, (form_id, requested_by))
+        form_ids = cursor.fetchall()
+
+        # Step 2: If formID exists, update the corresponding record to approve it
+        if form_ids:
+            cursor.execute("""
+                UPDATE own_ticketform 
+                SET Approval = 1 
+                WHERE FormID = %s
+            """, (form_id,))  # Directly update the specific formID
+
+        connection.commit()
+        affected_rows = cursor.rowcount
+        print(f"Affected rows: {affected_rows}")
+
+        if affected_rows > 0:
+            return {"success": True}
+        else:
+            return {"success": False, "error": "No matching records found."}
+
+    except Exception as e:
+        print(f"Error approving the request: {str(e)}")
+        return {"success": False, "error": str(e)}
+
+
 
 def delete_entry():
     try:
-        # Extract data from the request
+        # Extract data from the request with corrected parameter names
         data = request.json
         username = data.get('username')
-        start_date = data.get('start_date')
-        vehicle_type = data.get('vehicle_type')
-        requested_by = data.get('requested_by')
+        form_id = data.get('formID')  # Changed from form_id to formID
+        vehicle_type = data.get('vehicle_type')  # Changed from vehicle_type
+        requested_by = data.get('requested_by')  # Changed from requested_by
 
         # Validate required fields
-        if not all([username, start_date, vehicle_type, requested_by]):
+        if not all([username, form_id, vehicle_type, requested_by]):
             return jsonify({"success": False, "error": "Missing required fields."}), 400
 
-        # Connect to the database
         connection = config_connection()
         cursor = connection.cursor(dictionary=True)
 
         if vehicle_type == "Own Vehicle":
-            # Delete from own_traveldetails first
+            # Updated to use FormID instead of StartDate
             sql_delete_travel = """
             DELETE otd
             FROM own_traveldetails otd
             INNER JOIN own_ticketform otf
                 ON otd.FormID = otf.FormID
-            WHERE otd.StartDate = %s AND otf.VehicleType = %s AND otf.RequestedBy = %s
+            WHERE otf.FormID = %s
             """
-            cursor.execute(sql_delete_travel, (start_date, vehicle_type, requested_by))
+            cursor.execute(sql_delete_travel, (form_id,))
 
-            # Then delete from own_ticketform
             sql_delete_ticket = """
             DELETE FROM own_ticketform
-            WHERE VehicleType = %s AND RequestedBy = %s AND StartDate = %s
+            WHERE FormID = %s  # Use FormID directly
             """
-            cursor.execute(sql_delete_ticket, (vehicle_type, requested_by, start_date))
+            cursor.execute(sql_delete_ticket, (form_id,))
 
         else:  # For MCM vehicles
-            # Step 1: Fetch FormIDs to delete
-            sql_get_form_ids = """
-            SELECT mtd.FormID
-            FROM mcm_traveldetails mtd
-            INNER JOIN mcm_ticketform mtf
-                ON mtd.FormID = mtf.FormID
-            WHERE mtd.StartDate = %s AND mtf.VehicleType = %s AND mtf.RequestedBy = %s
-            """
-            cursor.execute(sql_get_form_ids, (start_date, vehicle_type, requested_by))
-            form_ids = cursor.fetchall()
-
-            if not form_ids:
-                return jsonify({"success": False, "error": "Entry not found."}), 404
-
-            form_id_list = [row["FormID"] for row in form_ids]
-
-            # Step 2: Delete from mcm_vehicledetails
+            # Simplified query using FormID from request
             sql_delete_vehicle_details = """
             DELETE FROM mcm_vehicledetails
-            WHERE FormID IN (%s)
-            """ % ', '.join(['%s'] * len(form_id_list))
-            cursor.execute(sql_delete_vehicle_details, form_id_list)
+            WHERE FormID = %s
+            """
+            cursor.execute(sql_delete_vehicle_details, (form_id,))
 
-            # Step 3: Delete from mcm_traveldetails
             sql_delete_travel = """
             DELETE FROM mcm_traveldetails
-            WHERE FormID IN (%s)
-            """ % ', '.join(['%s'] * len(form_id_list))
-            cursor.execute(sql_delete_travel, form_id_list)
+            WHERE FormID = %s
+            """
+            cursor.execute(sql_delete_travel, (form_id,))
 
-            # Step 4: Delete from mcm_ticketform
             sql_delete_ticket = """
             DELETE FROM mcm_ticketform
-            WHERE FormID IN (%s)
-            """ % ', '.join(['%s'] * len(form_id_list))
-            cursor.execute(sql_delete_ticket, form_id_list)
+            WHERE FormID = %s
+            """
+            cursor.execute(sql_delete_ticket, (form_id,))
 
         connection.commit()
-
-        # Check if rows were affected
-        if cursor.rowcount > 0:
-            return jsonify({"success": True})
-        else:
-            return jsonify({"success": False, "error": "Entry not found."}), 404
+        return jsonify({"success": True}) if cursor.rowcount > 0 else \
+               jsonify({"success": False, "error": "Entry not found."}), 404
 
     except Exception as e:
         print("Error deleting entry:", e)
         return jsonify({"success": False, "error": str(e)}), 500
 
-    finally:
-        if cursor:
-            cursor.close()
-        if connection:
-            connection.close()
 
 def cancel_entry():
     try:
@@ -868,3 +886,33 @@ def cancel_entry():
         if connection:
             connection.close()
 
+def get_max_capacity_from_mcm_listvehicles(vehicle_name):
+    connection = config_connection()  # Assuming you're using mysql.connector
+    cursor = connection.cursor()
+    query = "SELECT VehicleQuantity FROM mcm_listvehicles WHERE VehicleName = %s"
+    cursor.execute(query, (vehicle_name,))
+    result = cursor.fetchone()
+    connection.close()
+
+    if result:
+        return int(result[0])  # Ensure that the VehicleQuantity is returned as an integer
+    return 0  # Return 0 if no vehicle found for the given name
+
+def delete_vehicle_from_db(vehicle_name, plate_number, driver):
+    try:
+        connection = config_connection()
+        cursor = connection.cursor()
+        
+        # Delete the vehicle from the database using the additional filters
+        query = """
+            DELETE FROM mcm_vehicles 
+            WHERE VehicleName = %s 
+            AND VehiclePlateNumber = %s 
+            AND VehicleDriver = %s
+        """
+        cursor.execute(query, (vehicle_name, plate_number, driver))
+        
+        connection.commit()
+        connection.close()
+    except Exception as e:
+        print(f"Error deleting vehicle: {str(e)}")
