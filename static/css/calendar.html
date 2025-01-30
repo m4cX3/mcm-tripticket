@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calendar</title>
+    <link href='https://fonts.googleapis.com/css?family=Poppins' rel='stylesheet'>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/calendar.css') }}" type="text/css">
+</head>
+<body>
+    <div class="sidebar">
+        <div class="badge-logo">
+            <img id="mcm" src="{{ url_for('static', filename='images/mmcm small logo.png') }}" alt="MMCM Logo">
+        </div>
+        <a href='{{ url_for('user_dashboard_page', username=username) }}'>Dashboard</a>
+        <a href='{{ url_for('calendar_page', username=username) }}'>Calendar</a>
+        <a href='{{ url_for('user_records_page', username=username) }}'>Records</a>
+        <a href='{{ url_for('terms_and_conditions_page', username=username) }}'>Add Request</a>
+        <br><br>
+        <a href='{{ url_for('login_page') }}'>Log Out</a>
+    </div>
+
+    <div class="main-content">
+        <h2>Approved Requests Calendar</h2>
+        <div class="calendar">
+            <div class="calendar-grid">
+                {% for record in records %}
+                    <div class="calendar-event">
+                        <p><strong>Start Date:</strong> {{ record.StartDate }}</p>
+                        <p><strong>Requested By:</strong> {{ record.RequestedBy }}</p>
+                        <p><strong>Vehicle Type:</strong> {{ record.VehicleType }}</p>
+                    </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</body>
+</html>
