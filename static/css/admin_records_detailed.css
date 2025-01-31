@@ -152,6 +152,10 @@ td {
     background-color: #f44336;
 }
 
+.cancel-button {
+    background-color: #f44336;
+}
+
 /* Hover effects for buttons */
 .approve-button:hover {
     background-color: #009624;
@@ -165,6 +169,9 @@ td {
     background-color: #f44336;
 }
 
+.cancel-button:hover {
+    background-color: #f44336;
+}
 .modal {
     display: none;
     position: fixed;

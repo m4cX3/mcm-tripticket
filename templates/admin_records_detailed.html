@@ -80,7 +80,7 @@
             }
 
             
-            function cancelRequest(username, travelStartDate, vehicleType, requestedBy) {
+            function cancelRequest(username, formID, vehicleType, requestedBy) {
                 var remarks = prompt("Enter remarks for cancellation:");
                 if (remarks === null) {
                     return; // User clicked "Cancel"
@@ -91,7 +91,7 @@
                 }
             
                 // Construct the URL with parameters
-                const url = `/cancel_request?start_date=${encodeURIComponent(travelStartDate)}&vehicle_type=${encodeURIComponent(vehicleType)}&requested_by=${encodeURIComponent(requestedBy)}`;
+                const url = `/cancel_request?form_id=${encodeURIComponent(formID)}&vehicle_type=${encodeURIComponent(vehicleType)}&requested_by=${encodeURIComponent(requestedBy)}`;
             
                 fetch(url, {
                     method: 'POST',
@@ -265,7 +265,7 @@
             {% if details[0]['Approval'] == 1 and details[0]['Remarks'] is none %}
             <div class="button-container">
                 <input type="button" id="cancel" name="cancel" value="Cancel" class="cancel-button" 
-                    onclick="cancelRequest('{{ username }}', '{{ details[0]['StartDate'] }}', '{{ details[0]['VehicleType'] }}', '{{ details[0]['RequestedBy'] }}')">
+                    onclick="cancelRequest('{{ username }}', '{{ details[0]['FormID'] }}', '{{ details[0]['VehicleType'] }}', '{{ details[0]['RequestedBy'] }}')">
             </div>
             {% endif %}
         </div>

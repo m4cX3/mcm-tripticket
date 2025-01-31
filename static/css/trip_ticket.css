@@ -76,6 +76,10 @@ input[type="radio"] {
     color: white
 }
 
+label {
+    color: white;
+}
+
 input[type="radio"] + label {
     accent-color: white;
     display: inline-block;

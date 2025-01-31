@@ -42,15 +42,49 @@ function setRequiredFields(container, isRequired) {
 }
 
 function updateQuantity(vehicleName, change) {
-    const quantityInput = document.getElementById(vehicleName + '_quantity');
-    const availableQuantity = parseInt(quantityInput.getAttribute('max'));
+    let quantityInput = document.getElementById(vehicleName + "_quantity");
+    let selectedQuantityInput = document.getElementById(vehicleName + "_selected_quantity");
+    
     let newQuantity = parseInt(quantityInput.value) + change;
+    let maxQuantity = parseInt(quantityInput.max);
 
-    if (newQuantity >= 0 && newQuantity <= availableQuantity) {
-        quantityInput.value = newQuantity;
-        document.getElementById(vehicleName + '_selected_quantity').value = newQuantity;
+    if (newQuantity < 0) {
+        newQuantity = 0;
+    } else if (newQuantity > maxQuantity) {
+        newQuantity = maxQuantity;
     }
+
+    quantityInput.value = newQuantity;
+    selectedQuantityInput.value = newQuantity;
+
+    filterVehicles();
 }
+
+function filterVehicles() {
+    let vehicles = document.querySelectorAll(".vehicle");
+    let hasSelected = false;
+
+    vehicles.forEach(vehicle => {
+        let input = vehicle.querySelector("input[type='number']");
+        let quantity = parseInt(input.value);
+        
+        if (quantity > 0) {
+            hasSelected = true;
+        }
+    });
+
+    vehicles.forEach(vehicle => {
+        let input = vehicle.querySelector("input[type='number']");
+        let quantity = parseInt(input.value);
+
+        if (hasSelected && quantity === 0) {
+            vehicle.style.display = "none";
+        } else {
+            vehicle.style.display = "block";
+        }
+    });
+}
+
 
 function validateVehicleQuantities() {
     const vehicleInputs = document.querySelectorAll('input[name^="mcmVehicleQuantity"]'); // Select all vehicle quantity inputs
@@ -97,3 +131,8 @@ function deleteRow(tableId) {
         alert("Cannot delete any more rows."); // Alert if no more rows can be deleted
     }
 }
+
+document.addEventListener("DOMContentLoaded", function () {
+    let today = new Date().toISOString().split('T')[0];
+    document.getElementById("dateFilled").value = today;
+});

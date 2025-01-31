@@ -443,6 +443,12 @@ def delete_vehicle(username, vehicle_name):
         # Redirect back to the detailed vehicles page
         return redirect(url_for('admin_vehicles_detailed_page', username=username, vehicle_name=vehicle_name))
 
+@app.route('/delete_vehicle/<vehicle_name>', methods=['POST'])
+def delete_vehicles(vehicle_name):
+    result = delete_specific_vehicle(vehicle_name)
+    
+    # Return JSON response instead of redirect
+    return result
 
 if __name__ == '__main__':
     app.run(debug=True)

@@ -26,10 +26,14 @@
     
             <label for="purpose">Purpose of Trip:</label>
             <input type="text" id="purpose" name="purpose" required><br><br>
-    
-            <label for="radio-label">Will you use your own vehicle?:</label><br>
+            
+            <label>Will you use your own vehicle?</label>
+            <label for="ownVehicle">
             <input type="radio" id="ownVehicle" name="vehicle" value="Own Vehicle" onclick="toggleFields()" required> Yes
-            <input type="radio" id="mcmVehicle" name="vehicle" value="MCM Vehicle" onclick="toggleFields()" required> No <br><br>
+            </label>
+            <label for="mcmVehicle">
+                <input type="radio" id="mcmVehicle" name="vehicle" value="MCM Vehicle" onclick="toggleFields()" required> No
+            </label>
     
             <!-- Fields for "Yes" option (own vehicle) -->
             <div id="ownVehicleFields" style="display: none;">

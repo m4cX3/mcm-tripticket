@@ -27,6 +27,25 @@
                 reader.readAsDataURL(input.files[0]); // Read the file as a data URL
             }
         }
+        function deleteVehicle(vehicleName) {
+            if (confirm(`Are you sure you want to delete ${vehicleName}?`)) {
+                fetch(`/delete_vehicle/${vehicleName}`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        alert(`${vehicleName} has been deleted successfully.`);
+                        // Redirect to the admin_vehicles page with the username
+                        window.location.href = `{{ url_for('admin_vehicles_page', username=username) }}`;
+                    } else {
+                        alert(`Error deleting ${vehicleName}: ` + data.error);
+                    }
+                })
+                .catch(error => console.error('Error:', error));
+            }
+        }
     </script>
 </head>
 <body>
@@ -126,6 +145,7 @@
                 </tbody>
             </table>
         </div>
+        <button class="delete-button" onclick="deleteVehicle('{{ vehicle_name }}')">Delete</button>
     </div>
 </body>
 </html>
