@@ -5,6 +5,7 @@ body {
     padding: 0;
 }
 
+
 /* Sidebar */
 .sidebar {
     height: 100%;
@@ -110,6 +111,7 @@ td {
     border-radius: 10px;
     align-items: center;
     margin-bottom: 20px;
+    color: white;
 }
 
 .vehicle-section img {
@@ -140,38 +142,16 @@ td {
     transition: background-color 0.3s;
 }
 
-.approve-button {
-    background-color: #00c853;
+.addVehicle-button {
+    background-color: #000000;
 }
 
-.deny-button {
-    background-color: #f44336;
-}
-
-.delete-button {
-    background-color: #f44336;
-}
-
-.cancel-button {
-    background-color: #f44336;
-}
 
 /* Hover effects for buttons */
-.approve-button:hover {
+.addVehicle-button:hover {
     background-color: #009624;
 }
 
-.deny-button:hover {
-    background-color: #d32f2f;
-}
-
-.delete-button:hover {
-    background-color: #f44336;
-}
-
-.cancel-button:hover {
-    background-color: #f44336;
-}
 .modal {
     display: none;
     position: fixed;
@@ -216,4 +196,21 @@ td {
 
 .modal .button-container button {
     margin: 5px;
+}
+
+.approve-button {
+    background-color: #00c853;
+}
+
+.deny-button {
+    background-color: #f44336;
+}
+
+/* Hover effects for buttons */
+.approve-button:hover {
+    background-color: #009624;
+}
+
+.deny-button:hover {
+    background-color: #d32f2f;
 }

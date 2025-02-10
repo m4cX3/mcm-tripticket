@@ -5,6 +5,7 @@ body {
     padding: 0;
 }
 
+
 /* Sidebar */
 .sidebar {
     height: 100%;
@@ -110,6 +111,7 @@ td {
     border-radius: 10px;
     align-items: center;
     margin-bottom: 20px;
+    color: white;
 }
 
 .vehicle-section img {
@@ -125,7 +127,6 @@ td {
 
 .button-container {
     display: flex;
-    justify-content: center;
     margin-top: 30px;
 }
 
@@ -140,19 +141,21 @@ td {
     transition: background-color 0.3s;
 }
 
+.addVehicle-button {
+    background-color: #000000;
+}
+
+
+/* Hover effects for buttons */
+.addVehicle-button:hover {
+    background-color: #009624;
+}
+
 .approve-button {
     background-color: #00c853;
 }
 
 .deny-button {
-    background-color: #f44336;
-}
-
-.delete-button {
-    background-color: #f44336;
-}
-
-.cancel-button {
     background-color: #f44336;
 }
 
@@ -165,13 +168,6 @@ td {
     background-color: #d32f2f;
 }
 
-.delete-button:hover {
-    background-color: #f44336;
-}
-
-.cancel-button:hover {
-    background-color: #f44336;
-}
 .modal {
     display: none;
     position: fixed;
@@ -216,4 +212,29 @@ td {
 
 .modal .button-container button {
     margin: 5px;
+}
+
+#add-vehicle-form {
+    display: none; 
+    overflow: hidden;
+    height: 0;
+    transition: height 0.3s ease-out; /* Smooth transition */
+}
+
+#add-vehicle-form.show {
+    display: block;
+    height: auto; /* Allow the height to adjust */
+}
+
+.delete-button {
+    background-color: #ff4d4d; /* Red color */
+    color: white;
+    border: none;
+    padding: 5px 10px;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.delete-button:hover {
+    background-color: #cc0000; /* Darker red on hover */
 }

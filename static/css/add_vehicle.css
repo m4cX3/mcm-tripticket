@@ -5,6 +5,7 @@ body {
     padding: 0;
 }
 
+
 /* Sidebar */
 .sidebar {
     height: 100%;
@@ -44,6 +45,7 @@ body {
 .main-content {
     margin-left: 270px;
     padding: 20px;
+    color: white
 }
 
 /* Section headers */
@@ -59,8 +61,7 @@ h1, h2, h3 {
     color: white;
     border-radius: 10px;
     margin-bottom: 20px;
-    display: flex;
-    justify-content: space-between;
+    font-size: 20px;
 }
 
 .summary-box ul {
@@ -110,6 +111,7 @@ td {
     border-radius: 10px;
     align-items: center;
     margin-bottom: 20px;
+    color: white;
 }
 
 .vehicle-section img {
@@ -148,14 +150,6 @@ td {
     background-color: #f44336;
 }
 
-.delete-button {
-    background-color: #f44336;
-}
-
-.cancel-button {
-    background-color: #f44336;
-}
-
 /* Hover effects for buttons */
 .approve-button:hover {
     background-color: #009624;
@@ -165,13 +159,6 @@ td {
     background-color: #d32f2f;
 }
 
-.delete-button:hover {
-    background-color: #f44336;
-}
-
-.cancel-button:hover {
-    background-color: #f44336;
-}
 .modal {
     display: none;
     position: fixed;

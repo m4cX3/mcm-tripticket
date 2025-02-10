@@ -61,6 +61,7 @@ h1, h2, h3 {
     border-radius: 10px;
     margin-bottom: 20px;
     display: flex;
+    flex-wrap: wrap;
     justify-content: space-between;
 }
 
@@ -105,17 +106,20 @@ td {
 
 /* Vehicle section */
 .vehicle-section {
-    display: flex;
-    background-color: #547AAC;
-    padding: 20px;
-    border-radius: 10px;
-    align-items: center;
+    flex: 0 0 30%; /* Adjust the width to fit three items per row */
+    box-sizing: border-box;
     margin-bottom: 20px;
+    background-color: #547AAC;
+    padding: 10px;
+    border-radius: 5px;
+    text-align: center;
+    margin-bottom: 5px;
     color: white;
 }
 
 .vehicle-section img {
     width: 150px;
+    height: 150px;
     margin-right: 20px;
     border-radius: 8px;
 }
@@ -142,21 +146,14 @@ td {
     transition: background-color 0.3s;
 }
 
-.approve-button {
-    background-color: #00c853;
+.addVehicle-button {
+    background-color: #000000;
 }
 
-.deny-button {
-    background-color: #f44336;
-}
 
 /* Hover effects for buttons */
-.approve-button:hover {
+.addVehicle-button:hover {
     background-color: #009624;
-}
-
-.deny-button:hover {
-    background-color: #d32f2f;
 }
 
 .modal {

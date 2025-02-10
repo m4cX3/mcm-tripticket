@@ -8,10 +8,10 @@
   <link rel="stylesheet" href="{{ url_for('static', filename='css/user_records.css') }}" type="text/css">
   <title>User Records</title>
   <script>
-    function redirectToDetails(startDate, vehicleType, requestedBy) {
+    function redirectToDetails(formID, vehicleType, requestedBy) {
       // Redirect to the details page with query parameters
-      window.location.href = `/user_records_detailed?start_date=${encodeURIComponent(startDate)}&vehicle_type=${encodeURIComponent(vehicleType)}&requested_by=${encodeURIComponent(requestedBy)}`;
-    }
+      window.location.href = `/user_records_detailed?form_id=${encodeURIComponent(formID)}&vehicle_type=${encodeURIComponent(vehicleType)}&requested_by=${encodeURIComponent(requestedBy)}`;
+  }
   </script>
 </head>
 
@@ -22,7 +22,7 @@
     </div>
     <a href='{{ url_for('user_dashboard_page', username=username) }}'>Dashboard</a>
     <a href='{{ url_for('user_records_page', username=username) }}'>Records</a>
-    <a href='{{ url_for('terms_and_conditions_page', username=username) }}'">Add Request</a>
+    <a href='{{ url_for('terms_and_conditions_page', username=username) }}'>Add Request</a>
     <br><br>
     <a href='{{ url_for('login_page') }}'>Log Out</a>
   </div>
@@ -37,7 +37,9 @@
       </div>
     </form>
 
-    <!-- Table for records with Approval == 0 -->
+    <!-- Table for records with Approval == 0 and Remarks is none -->
+    {% set pending_records = own_records | selectattr('Approval', 'equalto', 0) | selectattr('Remarks', 'none') | list %}
+    {% if pending_records %}
     <br>
     <h3>Pending Requests</h3>
     <div class="pending-square">
@@ -55,21 +57,24 @@
           </tr>
         </thead>
         <tbody>
-          {% for record in own_records %}
-            {% if record['Approval'] == 0 and record['Remarks'] is none %}
-              <tr class="pending-row"
-                onclick="redirectToDetails('{{ record['StartDate'] }}', '{{ record['VehicleType'] }}', '{{ record['RequestedBy'] }}')">
-                <td>{{ record['DateFilled'] }}</td>
-                <td>{{ record['RequestedBy'] }}</td>
-                <td>{{ record['VehicleType'] }}</td>
-                <td>{{ record['StartDate'] }}</td>
-                <td>{{ record['Destinations'] }}</td>
-              </tr>
-            {% endif %}
+          {% for record in pending_records %}
+            <tr class="pending-row"
+              onclick="redirectToDetails('{{ record['FormID'] }}', '{{ record['VehicleType'] }}', '{{ record['RequestedBy'] }}')">
+              <td>{{ record['DateFilled'] }}</td>
+              <td>{{ record['RequestedBy'] }}</td>
+              <td>{{ record['VehicleType'] }}</td>
+              <td>{{ record['StartDate'] }}</td>
+              <td>{{ record['Destinations'] }}</td>
+            </tr>
           {% endfor %}
         </tbody>
       </table>
     </div>
+    {% endif %}
+
+    <!-- Table for records with Approval == 0 and Remarks is not none -->
+    {% set denied_records = own_records | selectattr('Approval', 'equalto', 0) | selectattr('Remarks', 'ne', none) | list %}
+    {% if denied_records %}
     <br><br><br>
     <h3>Denied Requests</h3>
     <div class="denied-square">
@@ -87,23 +92,25 @@
           </tr>
         </thead>
         <tbody>
-          {% for record in own_records %}
-            {% if record['Approval'] == 0 and record.get('Remarks') is not none %}
-              <tr class="denied-row"
-                onclick="redirectToDetails('{{ record['StartDate'] }}', '{{ record['VehicleType'] }}', '{{ record['RequestedBy'] }}')">
-                <td>{{ record['DateFilled'] }}</td>
-                <td>{{ record['RequestedBy'] }}</td>
-                <td>{{ record['VehicleType'] }}</td>
-                <td>{{ record['StartDate'] }}</td>
-                <td>{{ record['Destinations'] }}</td>
-              </tr>
-            {% endif %}
+          {% for record in denied_records %}
+            <tr class="denied-row"
+              onclick="redirectToDetails('{{ record['FormID'] }}', '{{ record['VehicleType'] }}', '{{ record['RequestedBy'] }}')">
+              <td>{{ record['DateFilled'] }}</td>
+              <td>{{ record['RequestedBy'] }}</td>
+              <td>{{ record['VehicleType'] }}</td>
+              <td>{{ record['StartDate'] }}</td>
+              <td>{{ record['Destinations'] }}</td>
+            </tr>
           {% endfor %}
         </tbody>
       </table>
     </div>
-    <br><br><br>
+    {% endif %}
+
     <!-- Table for records with Approval == 1 -->
+    {% set approved_records = own_records | selectattr('Approval', 'equalto', 1) | list %}
+    {% if approved_records %}
+    <br><br><br>
     <h3>Approved Requests</h3>
     <div class="data-square">
       <table>
@@ -120,21 +127,20 @@
           </tr>
         </thead>
         <tbody>
-          {% for record in own_records %}
-            {% if record['Approval'] == 1 %}
-              <tr class="data-row"
-                onclick="redirectToDetails('{{ record['StartDate'] }}', '{{ record['VehicleType'] }}', '{{ record['RequestedBy'] }}')">
-                <td>{{ record['DateFilled'] }}</td>
-                <td>{{ record['RequestedBy'] }}</td>
-                <td>{{ record['VehicleType'] }}</td>
-                <td>{{ record['StartDate'] }}</td>
-                <td>{{ record['Destinations'] }}</td>
-              </tr>
-            {% endif %}
+          {% for record in approved_records %}
+            <tr class="data-row"
+              onclick="redirectToDetails('{{ record['FormID'] }}', '{{ record['VehicleType'] }}', '{{ record['RequestedBy'] }}')">
+              <td>{{ record['DateFilled'] }}</td>
+              <td>{{ record['RequestedBy'] }}</td>
+              <td>{{ record['VehicleType'] }}</td>
+              <td>{{ record['StartDate'] }}</td>
+              <td>{{ record['Destinations'] }}</td>
+            </tr>
           {% endfor %}
         </tbody>
       </table>
     </div>
+    {% endif %}
   </div>
 </body>
 </html>

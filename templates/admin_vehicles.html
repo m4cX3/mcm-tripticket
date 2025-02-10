@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Form Summary</title>
     <link href='https://fonts.googleapis.com/css?family=Poppins' rel='stylesheet'>
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/admin_records_detailed.css') }}" type="text/css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/admin_vehicles.css') }}" type="text/css">
 </head>
 <body>
     <!-- Sidebar -->
@@ -30,14 +30,17 @@
                 {% if vehicle.AvailableQuantity != 0 %}
                 <div class="vehicle" id="vehicle_{{ vehicle.VehicleName }}">
                     <h2 style="color: white; text-align: center">{{ vehicle.VehicleName }}</h2>
-                    <img src="data:image/jpeg;base64,{{ vehicle.VehicleImage }}" alt="{{ vehicle.VehicleName }}" style="max-width: 300px; max-height: 300px;">
+                    <a href="{{ url_for('admin_vehicles_detailed_page', vehicle_name=vehicle.VehicleName, username=username) }}">
+                        <img src="data:image/jpeg;base64,{{ vehicle.VehicleImage }}" alt="{{ vehicle.VehicleName }}" style="max-width: 300px; max-height: 300px;">
+                    </a>
                     <p style="text-align: center">Available: <strong id="available_{{ vehicle.VehicleName }}">{{ vehicle.AvailableQuantity }}</strong></p>
                     <p style="text-align: center">Seating Capacity: {{ vehicle.VehicleSeatingCapacity }}</p>
-                    <input type="hidden" name="vehicle_name[]" value="{{ vehicle.VehicleName }}">
-                    <input type="hidden" id="{{ vehicle.VehicleName }}_selected_quantity" name="mcmVehicleQuantity[{{ vehicle.VehicleName }}]" value="0">
                 </div>
                 {% endif %}
             {% endfor %}
+        </div>
+        <div class="button-container">
+            <input type="button" id="addVehicle" name="addVehicle" class="addVehicle-button" value="Add New Vehicle" onclick="window.location.href='{{ url_for('add_vehicles_page', username=username) }}'">
         </div>        
     </div>
 </body>

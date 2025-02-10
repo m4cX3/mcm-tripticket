@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Form Summary</title>
+    <link href='https://fonts.googleapis.com/css?family=Poppins' rel='stylesheet'>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/add_vehicle.css') }}" type="text/css">
+</head>
+<body>
+    <!-- Sidebar -->
+    <div class="sidebar">
+        <div class="badge-logo">
+            <img id="mcm" src="{{ url_for('static', filename='images/mmcm small logo.png') }}" alt="MMCM Logo">
+        </div>
+        <a href='{{ url_for('admin_dashboard_page', username=username) }}'>Dashboard</a>
+        <a href='{{ url_for('admin_requests_page', username=username) }}'>Requests</a>
+        <a href='{{ url_for('admin_records_page', username=username) }}'>Records</a>
+        <a href='{{ url_for('admin_vehicles_page', username=username) }}'>Vehicles</a>
+        <br><br>
+        <a href='{{ url_for('login_page') }}'>Log Out</a>
+    </div>
+
+    <!-- Main content -->
+    <div class="main-content">
+        <h3>Add a Vehicle</h3>
+        <br>
+        <form action="/add_vehicles" method="POST" enctype="multipart/form-data">
+            <div class="summary-box">
+                <ul>
+                    <li>Enter vehicle name: <input type="text" id="vehicleName" name="vehicleName" required></li>
+                    <li>Enter vehicle quantity: <input type="text" id="vehicleQuantity" name="vehicleQuantity" required></li>
+                    <li>Enter seating capacity: <input type="text" id="vehicleSeatingCapacity" name="vehicleSeatingCapacity" required></li>
+                    <li>Insert image: <input type="file" id="vehicleImage" name="vehicleImage" accept="image/*" required onchange="previewImage()"></li>
+                </ul>
+                <!-- Image Preview Section -->
+                <div id="imagePreview" style="margin-top: 15px;">
+                    <img id="preview" src="#" alt="Image preview will appear here" style="max-width: 300px; display: none; border: 1px solid #ddd; border-radius: 10px; padding: 5px;">
+                </div>
+                <br>
+                <button type="submit">Submit</button>
+            </div>
+        </form>
+    </div>
+</body>
+<script>
+    // JavaScript function to preview the selected image
+    function previewImage() {
+        const input = document.getElementById('vehicleImage');
+        const preview = document.getElementById('preview');
+        
+        if (input.files && input.files[0]) {
+            const reader = new FileReader();
+            
+            reader.onload = function (e) {
+                preview.src = e.target.result; // Set the src of the preview image
+                preview.style.display = 'block'; // Make the preview visible
+            }
+            
+            reader.readAsDataURL(input.files[0]); // Read the file as a data URL
+        }
+    }
+</script>
+</html>

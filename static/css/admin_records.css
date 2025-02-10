@@ -79,7 +79,7 @@ body {
 
 /* Records Overview */
 .square {
-  height: 1200px;
+  height: fit-content;
   width: auto;
   padding: 30px;
   border-radius: 3%;
