@@ -7,10 +7,16 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='css/admin_requests.css') }}" type="text/css">
     <title>Admin Records</title>
     <script>
-      function redirectToDetails(startDate, vehicleType, requestedBy) {
+      function redirectToDetails(formID, vehicleType, requestedBy) {
+        if (!formID || !vehicleType || !requestedBy) {
+            alert("Missing parameters");
+            return;
+        }
+    
         // Redirect to the details page with query parameters
-        window.location.href = `/admin_records_detailed?start_date=${encodeURIComponent(startDate)}&vehicle_type=${encodeURIComponent(vehicleType)}&requested_by=${encodeURIComponent(requestedBy)}`;
-      } 
+        window.location.href = `/admin_records_detailed?form_id=${encodeURIComponent(formID)}&vehicle_type=${encodeURIComponent(vehicleType)}&requested_by=${encodeURIComponent(requestedBy)}`;
+    }
+    
     </script>
 </head>
 <body>
@@ -46,7 +52,7 @@
                 {% for record in records %}
                   {% if record['Approval'] == 0 and record['Remarks'] is none %}
                   <tr class="data-row"
-                      onclick="redirectToDetails('{{ record['StartDate'] }}', '{{ record['VehicleType'] }}', '{{ record['RequestedBy'] }}')">
+                      onclick="redirectToDetails('{{ record['FormID'] }}', '{{ record['VehicleType'] }}', '{{ record['RequestedBy'] }}')">
                       <td>{{ record['DateFilled'] }}</td>
                       <td>{{ record['RequestedBy'] }}</td>
                       <td>{{ record['VehicleType'] }}</td>

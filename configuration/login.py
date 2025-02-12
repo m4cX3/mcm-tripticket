@@ -1,5 +1,6 @@
 from flask import Flask, render_template, request, redirect, url_for, session
 from configuration.sql_connections import config_connection
+import sqlite3
 
 app = Flask(__name__)
 app.secret_key = 'your'
@@ -26,7 +27,7 @@ def get_user_id(username):
 
         # Assuming username is just the part before '@' in the email
         email = f"{username}@mcm.edu.ph"  # Replace with the correct domain if applicable
-        cursor.execute('SELECT UserID FROM accounts WHERE Email = %s', (email,))
+        cursor.execute('SELECT UserID FROM accounts WHERE Email = ?', (email,))
         user_id = cursor.fetchone()
         
         return user_id[0] if user_id else None  # Return UserID or None if not found
@@ -50,7 +51,7 @@ def login():
         connection = config_connection()
         cursor = connection.cursor()
 
-        cursor.execute('SELECT * FROM accounts WHERE Email = %s AND Password = %s', (email, password,))
+        cursor.execute('SELECT * FROM accounts WHERE Email = ? AND Password = ?', (email, password,))
         account = cursor.fetchone()
 
         if account is None:

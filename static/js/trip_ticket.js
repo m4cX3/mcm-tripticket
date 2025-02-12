@@ -42,33 +42,73 @@ function setRequiredFields(container, isRequired) {
 }
 
 function updateQuantity(vehicleName, change) {
-    const quantityInput = document.getElementById(vehicleName + '_quantity');
-    const availableQuantity = parseInt(quantityInput.getAttribute('max'));
+    let quantityInput = document.getElementById(vehicleName + "_quantity");
+    let selectedQuantityInput = document.getElementById(vehicleName + "_selected_quantity");
+    
     let newQuantity = parseInt(quantityInput.value) + change;
+    let maxQuantity = parseInt(quantityInput.max);
 
-    if (newQuantity >= 0 && newQuantity <= availableQuantity) {
-        quantityInput.value = newQuantity;
-        document.getElementById(vehicleName + '_selected_quantity').value = newQuantity;
+    if (newQuantity < 0) {
+        newQuantity = 0;
+    } else if (newQuantity > maxQuantity) {
+        newQuantity = maxQuantity;
     }
+
+    quantityInput.value = newQuantity;
+    selectedQuantityInput.value = newQuantity;
+
+    filterVehicles();
 }
 
-function validateVehicleQuantities() {
-    const vehicleInputs = document.querySelectorAll('input[name^="mcmVehicleQuantity"]'); // Select all vehicle quantity inputs
-    let isValid = false;
+function filterVehicles() {
+    let vehicles = document.querySelectorAll(".vehicle");
+    let hasSelected = false;
 
-    // Check if at least one vehicle has a quantity greater than 0
-    vehicleInputs.forEach(input => {
-        if (parseInt(input.value) > 0) {
-            isValid = true; // Set valid if any quantity is greater than 0
+    vehicles.forEach(vehicle => {
+        let input = vehicle.querySelector("input[type='number']");
+        let quantity = parseInt(input.value);
+        
+        if (quantity > 0) {
+            hasSelected = true;
         }
     });
 
-    if (!isValid) {
-        alert("Please select at least one vehicle with a quantity greater than 0.");
+    vehicles.forEach(vehicle => {
+        let input = vehicle.querySelector("input[type='number']");
+        let quantity = parseInt(input.value);
+
+        if (hasSelected && quantity === 0) {
+            vehicle.style.display = "none";
+        } else {
+            vehicle.style.display = "block";
+        }
+    });
+}
+
+
+function validateVehicleQuantities() {
+    const mcmVehicleRadio = document.getElementById("mcmVehicle");
+    
+    // Only validate if "No" (MCM Vehicle) is selected
+    if (mcmVehicleRadio.checked) {
+        const vehicleInputs = document.querySelectorAll('input[name^="mcmVehicleQuantity"]');
+        let isValid = false;
+
+        vehicleInputs.forEach(input => {
+            if (parseInt(input.value) > 0) {
+                isValid = true; 
+            }
+        });
+
+        if (!isValid) {
+            alert("Please select at least one vehicle with a quantity greater than 0.");
+            return false; // Prevent form submission
+        }
     }
 
-    return isValid; // Return true to allow form submission if valid
+    return true; // Allow form submission if validation is passed or not required
 }
+
 
 
 function addRow(tableId) {
@@ -97,3 +137,8 @@ function deleteRow(tableId) {
         alert("Cannot delete any more rows."); // Alert if no more rows can be deleted
     }
 }
+
+document.addEventListener("DOMContentLoaded", function () {
+    let today = new Date().toISOString().split('T')[0];
+    document.getElementById("dateFilled").value = today;
+});

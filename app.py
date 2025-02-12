@@ -1,7 +1,7 @@
-from flask import Flask, render_template, request, redirect, url_for, session, json
+from flask import Flask, render_template, request, redirect, url_for, session
 from datetime import datetime
 from configuration.sql_connections import *
-from configuration.submitform import submitform
+from configuration.submitform import submitform, insert_vehicle, insert_specific_vehicle
 from configuration.login import login, get_user_id
 
 app = Flask(__name__)
@@ -155,19 +155,62 @@ def admin_requests_page():
 
     return render_template('admin_requests.html', records=records, username=username)
 
+@app.route('/mcm_vehicle_approved', methods=['GET'])
+def mcm_vehicle_approved_page():
+    username = session.get('username')
+    
+    form_id = request.args.get('form_id')
+    vehicle_type = request.args.get('vehicle_type')
+    requested_by = request.args.get('requested_by')
+    vehicle_name = request.args.get('vehicle_name')
+    
+    form_details = show_specific_record(form_id, vehicle_type, requested_by)
+    complete_details = show_vehicles_detailed(vehicle_name)
+
+    return render_template(
+        'mcm_vehicle_approved.html', 
+        form_details=form_details, 
+        details=complete_details, 
+        username=username,
+        form_id=form_id, 
+        vehicle_type=vehicle_type, 
+        requested_by=requested_by, 
+        vehicle_name=vehicle_name
+    )
+
+
 @app.route('/admin_records_detailed', methods=['GET', 'POST'])
 def admin_records_detailed_page():
-    
     username = session.get('username')
 
-    start_date = request.args.get('start_date')
+    # Fetch query parameters from the URL
+    form_id = request.args.get('form_id')
     vehicle_type = request.args.get('vehicle_type')
     requested_by = request.args.get('requested_by')
 
-    complete_details = show_specific_record()
-    print(complete_details)
+    # Debug print statements to ensure the parameters are being passed correctly
+    print(f"Form ID: {form_id}, Vehicle Type: {vehicle_type}, Requested By: {requested_by}")
+
+    # If form_id, vehicle_type, or requested_by are missing, return a 400 error
+    if not form_id or not vehicle_type or not requested_by:
+        return "Missing parameters", 400
+
+    # Call the function to get the complete details using form_id, vehicle_type, and requested_by
+    complete_details = show_specific_record(form_id, vehicle_type, requested_by)
+
+    # Handle POST request
+    if request.method == 'POST':
+        if vehicle_type == "Own Vehicle":
+            return redirect(url_for('admin_records_page', username=username))
+        elif vehicle_type == "MCM Vehicle":
+            return redirect(url_for('mcm_vehicle_approved_page', username=username, vehicle_data=complete_details))
+
+    # Render the page with the fetched details
     return render_template('admin_records_detailed.html', details=complete_details, username=username,
-                           start_date=start_date, vehicle_type=vehicle_type, requested_by=requested_by)
+                           form_id=form_id, vehicle_type=vehicle_type, requested_by=requested_by)
+
+
+
 
 @app.route('/admin_vehicles', methods=['GET'])
 def admin_vehicles_page():
@@ -177,6 +220,55 @@ def admin_vehicles_page():
     complete_details = show_mcm_vehicles()
     print(complete_details)
     return render_template('admin_vehicles.html', details=complete_details, username=username)
+
+@app.route('/admin_vehicles_detailed/<vehicle_name>', methods=['GET', 'POST'])
+def admin_vehicles_detailed_page(vehicle_name):
+    username = session.get('username')
+    
+    if not vehicle_name:
+        return redirect(url_for('admin_vehicles_page'))  # Redirect if no vehicle name provided
+
+    # Fetch the detailed vehicle records for the given vehicle name
+    complete_details = show_vehicles_detailed(vehicle_name)
+    print(complete_details)
+
+    # Fetch the max capacity (VehicleQuantity) from the mcm_listvehicles table based on vehicle_name
+    max_capacity = get_max_capacity_from_mcm_listvehicles(vehicle_name)
+
+    # Calculate the total number of vehicles
+    total_vehicles = len(complete_details)
+
+    # Check if the vehicle list is full
+    is_full = total_vehicles >= max_capacity  # If total vehicles reach max capacity, set is_full to True
+
+    if request.method == 'POST':
+        # Insert the new vehicle based on the form data
+        form_data = insert_specific_vehicle()
+        add_specific_vehicle(form_data)
+        # Redirect to the same page after adding a vehicle
+        return redirect(url_for('admin_vehicles_detailed_page', username=username, vehicle_name=vehicle_name))
+    
+    # Render the template with the vehicle details, username, vehicle name, total vehicles, max capacity, and full status
+    return render_template('admin_vehicles_detailed.html', 
+                           details=complete_details, 
+                           username=username, 
+                           vehicle_name=vehicle_name, 
+                           total_vehicles=total_vehicles,
+                           max_capacity=max_capacity,
+                           is_full=is_full)  # Pass the is_full flag to the template
+
+
+
+@app.route('/add_vehicles', methods=['GET', 'POST'])
+def add_vehicles_page():
+    username = session.get('username')
+    if request.method == 'POST':
+        form_data = insert_vehicle()
+        add_vehicle(form_data)
+        return redirect(url_for('admin_vehicles_page', username=username))
+
+    return render_template('add_vehicle.html', username=username)
+
 
 @app.route('/user_records', methods=['GET', 'POST'])
 def user_records_page():
@@ -212,19 +304,34 @@ def user_records_page():
         elif end_date:
             own_records = [record for record in own_records if record['DateFilled'] <= end_date]
 
+    # Return filtered records to the template
     return render_template('user_records.html', own_records=own_records, username=username, name=name_filter, start_date=start_date, end_date=end_date)
+
 
 @app.route('/user_records_detailed', methods=['GET'])
 def user_records_detailed_page():
     
-    complete_details = show_specific_record()
+    # Fetch query parameters from the URL
+    form_id = request.args.get('form_id')
+    vehicle_type = request.args.get('vehicle_type')
+    requested_by = request.args.get('requested_by')
+
+    # Debug print statements to ensure the parameters are being passed correctly
+    print(f"Form ID: {form_id}, Vehicle Type: {vehicle_type}, Requested By: {requested_by}")
+
+    # If form_id, vehicle_type, or requested_by are missing, return a 400 error
+    if not form_id or not vehicle_type or not requested_by:
+        return "Missing parameters", 400
+
+    # Call the function to get the complete details using form_id, vehicle_type, and requested_by
+    complete_details = show_specific_record(form_id, vehicle_type, requested_by)
+
     return render_template('user_records_detailed.html', details=complete_details)
 
 @app.route('/terms_and_conditions', methods=['GET'])
 def terms_and_conditions_page():
 
     username = session.get('username')
-
     return render_template('terms_and_conditions.html', username=username)
 
 @app.route('/trip_ticket')
@@ -265,6 +372,10 @@ def insert_own_form_to_database():
 
     print(f"UserID for username {username}: {user_id}")
 
+    if user_id == 'admin':
+        insert_own_data(form_data, user_id)
+        return redirect(url_for('admin_requests_page', username=username))
+    
     if user_id is not None:
         insert_own_data(form_data, user_id)
         return redirect(url_for('user_records_page', username=username))
@@ -288,6 +399,10 @@ def insert_mcm_form_to_database():
     
     print(f"UserID for username {username}: {user_id}")
 
+    if user_id == 'admin':
+        insert_mcm_data(form_data, user_id)
+        return redirect(url_for('admin_requests_page', username=username))
+    
     if user_id is not None:
         insert_mcm_data(form_data, user_id)
         return redirect(url_for('user_records_page', username=username))
@@ -295,14 +410,45 @@ def insert_mcm_form_to_database():
         print("UserID not found for the given username.")
         return redirect(url_for('trip_ticket_page', username=username))
 
-@app.route('/approve_request', methods=['POST'])
-def approve_form_request():
-    return approve_form()
+@app.route('/approve_own_request', methods=['POST'])
+def approve_own_form_request():
+    return approve_own_form()
+
+@app.route('/approve_mcm_request', methods=['POST'])
+def approve_mcm_form_request():
+    return approve_mcm_form()
 
 @app.route('/deny_request', methods=['POST'])
 def deny_form_request():
     return deny_form()
 
+@app.route('/delete_entry', methods=['POST'])
+def delete_entry_request():
+    return delete_entry()
+
+@app.route('/cancel_request', methods=['POST'])
+def cancel_entry_request():
+    return cancel_entry()
+
+@app.route('/delete_vehicle/<username>/<vehicle_name>', methods=['POST'])
+def delete_vehicle(username, vehicle_name):
+    if request.method == 'POST':
+        # Get the additional parameters from the form
+        plate_number = request.form.get('plate_number')
+        driver = request.form.get('driver')
+        
+        # Call the function to delete the vehicle with the additional filters
+        delete_vehicle_from_db(vehicle_name, plate_number, driver)
+        
+        # Redirect back to the detailed vehicles page
+        return redirect(url_for('admin_vehicles_detailed_page', username=username, vehicle_name=vehicle_name))
+
+@app.route('/delete_vehicle/<vehicle_name>', methods=['POST'])
+def delete_vehicles(vehicle_name):
+    result = delete_specific_vehicle(vehicle_name)
+    
+    # Return JSON response instead of redirect
+    return result
 
 if __name__ == '__main__':
     app.run(debug=True)

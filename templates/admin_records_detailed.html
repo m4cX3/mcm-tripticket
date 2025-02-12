@@ -1,172 +1,273 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Form Summary</title>
-    <link href='https://fonts.googleapis.com/css?family=Poppins' rel='stylesheet'>
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/admin_records_detailed.css') }}" type="text/css">
-    <script>
-        function denyRequest(username, travelStartDate, vehicleType, requestedBy) {
-            var remarks = prompt("Enter remarks for denial:");
-            if (remarks === null) {
-                return; // User clicked "Cancel"
-            }
-            if (remarks.trim() === '') {
-                alert('Please enter remarks.');
-                return;
-            }
-        
-            // Construct the URL with parameters
-            const url = `/deny_request?start_date=${encodeURIComponent(travelStartDate)}&vehicle_type=${encodeURIComponent(vehicleType)}&requested_by=${encodeURIComponent(requestedBy)}`;
-        
-            fetch(url, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({
-                    'username': username,
-                    'remarks': remarks,
-                })
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    alert('Request has been Denied');
-                    window.location.href = '/admin_records?username=' + username;  // Redirect to requests page after denying
-                } else {
-                    alert('Error denying request');
-                }
-            })
-            .catch(error => console.error('Error:', error));
-        }
-        
-        // Extract URL parameters
-        function getUrlParams() {
-            const urlParams = new URLSearchParams(window.location.search);
-            const startDate = urlParams.get('start_date');
-            const vehicleType = urlParams.get('vehicle_type');
-            const requestedBy = urlParams.get('requested_by');
+    <!DOCTYPE html>
+    <html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Form Summary</title>
+        <link href='https://fonts.googleapis.com/css?family=Poppins' rel='stylesheet'>
+        <link rel="stylesheet" href="{{ url_for('static', filename='css/admin_records_detailed.css') }}" type="text/css">
+        <script>
+            function onDeleteButtonClick(username) {
+                if (confirm("Are you sure you want to delete this entry?")) {
+                    // Retrieve required details from the template context or URL
+                    const { formID, vehicleType, requestedBy } = getUrlParams();
             
-            console.log(startDate, vehicleType, requestedBy); // Debugging to check values
-            
-            return { startDate, vehicleType, requestedBy };
-        }
-
-        // Event handler for the deny button
-        function onDenyButtonClick(username) {
-            const { startDate, vehicleType, requestedBy } = getUrlParams();
-            denyRequest(username, startDate, vehicleType, requestedBy);
-        }
-
-        function approveRequest(username, travelStartDate, vehicleType, requestedBy) {
-            // Construct the URL with parameters
-            const url = `/approve_request?start_date=${encodeURIComponent(travelStartDate)}&vehicle_type=${encodeURIComponent(vehicleType)}&requested_by=${encodeURIComponent(requestedBy)}`;
-        
-            fetch(url, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({
-                    'username': username
-                })
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    alert('Request has been Approved');
-                    window.location.href = '/admin_records?username=' + username;  // Redirect to requests page after approval
-                } else {
-                    alert('Error approving request: ' + data.error);
+                    // Make a DELETE request to the server
+                    fetch(`/delete_entry`, {
+                        method: 'POST', // Use POST for consistency with CSRF protection
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({
+                            username: username,
+                            formID: formID,
+                            vehicle_type: vehicleType,
+                            requested_by: requestedBy,
+                        }),
+                    })
+                    .then((response) => response.json())
+                    .then((data) => {
+                        if (data.success) {
+                            alert("Entry successfully deleted.");
+                            window.location.href = '/admin_records?username=' + encodeURIComponent(username); // Redirect to the records page
+                        } else {
+                            alert("Error deleting the entry: " + data.error);
+                        }
+                    })
+                    .catch((error) => console.error("Error:", error));
                 }
-            })
-            .catch(error => console.error('Error:', error));
-        }
-        
-        // Event handler for the approve button
-        function onApproveButtonClick(username) {
-            const { startDate, vehicleType, requestedBy } = getUrlParams();
-            approveRequest(username, startDate, vehicleType, requestedBy);
-        }
-        
-    </script>
-</head>
-<body>
-    <!-- Sidebar -->
-    <div class="sidebar">
-        <div class="badge-logo">
-            <img id="mcm" src="{{ url_for('static', filename='images/mmcm small logo.png') }}" alt="MMCM Logo">
-        </div>
-        <a href='{{ url_for('admin_dashboard_page', username=username) }}'>Dashboard</a>
-        <a href='{{ url_for('admin_requests_page', username=username) }}'>Requests</a>
-        <a href='{{ url_for('admin_records_page', username=username) }}'>Records</a>
-        <a href='{{ url_for('admin_vehicles_page', username=username) }}'>Vehicles</a>
-        <br><br>
-        <a href='{{ url_for('login_page') }}'>Log Out</a>
-    </div>
+            }
 
-    <!-- Main content -->
-    <div class="main-content">
-        {% if details[0]['Approval'] == 0 and details[0]['Remarks'] is none %}
-        <h3>This is a pending request</h3>
-        {% endif %}
-        {% if details[0]['Approval'] == 0 and details[0]['Remarks'] is not none %}
-        <h3>Request has been denied</h3>
-        {% endif %}
-        {% if details[0]['Approval'] == 1 %}
-        <h3>Request has been accepted</h3>
-        {% endif %}
-        <!-- Summary box -->
-        <div class="summary-box">
-            <ul>
-                <li><strong>Date Filled:</strong> {{ details[0]['DateFilled'] }}</li>
-                <li><strong>Requested By:</strong> {{ details[0]['RequestedBy'] }}</li>
-                <li><strong>Department:</strong> {{ details[0]['Department'] }} </li>
-                <li><strong>Purpose of Trip:</strong> {{ details[0]['Purpose_Of_Trip'] }}</li>
-                <li><strong>Vehicle Type:</strong> {{ details[0]['VehicleType'] }}</li>
-                <br>
-                {% if details[0]['VehicleType'] == "Own Vehicle" %}
-                    <li><strong>Vehicle Name:</strong> {{ details[0]['VehicleName'] }}</li>
-                    <li><strong>Vehicle Classification:</strong> {{ details[0]['Classification'] }}</li>
-                    <li><strong>Vehicle Seating Capacity:</strong> {{ details[0]['SeatingCapacity'] }}</li>
-                    <li><strong>Vehicle Plate Number:</strong> {{ details[0]['PlateNumber'] }}</li>
-                {% elif details[0]['VehicleType'] == "MCM Vehicle" %}
-                    <li><strong>Vehicle Name:</strong> {{ details[0]['VehicleName'] }}</li>
-                    <li><strong>Vehicle Quantity:</strong> {{ details[0]['VehicleQuantity'] }}</li>
-                {% endif %}
+            function denyRequest(username, formID, vehicleType, requestedBy) {
+                var remarks = prompt("Enter remarks for denial:");
+                if (remarks === null) {
+                    return; // User clicked "Cancel"
+                }
+                if (remarks.trim() === '') {
+                    alert('Please enter remarks.');
+                    return;
+                }
+            
+                // Construct the URL with formID instead of startDate for denial
+                const url = `/deny_request?form_id=${encodeURIComponent(formID)}&vehicle_type=${encodeURIComponent(vehicleType)}&requested_by=${encodeURIComponent(requestedBy)}`;
+            
+                fetch(url, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        'username': username,
+                        'remarks': remarks,
+                    })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        alert('Request has been Denied');
+                        window.location.href = '/admin_records?username=' + encodeURIComponent(username);  // Redirect to requests page after denying
+                    } else {
+                        alert('Error denying request: ' + data.error);
+                    }
+                })
+                .catch(error => console.error('Error:', error));
+            }
+            
+            // Event handler for the deny button
+            function onDenyButtonClick(username) {
+                const { formID, vehicleType, requestedBy } = getUrlParams(); // Fetch formID from the URL
+                denyRequest(username, formID, vehicleType, requestedBy); // Pass formID to denyRequest
+            }
 
-                {% if details[0]['Remarks'] is not none %}
-                <br><br><li><strong>Remarks for Denial: </strong> {{ details[0]['Remarks']}}</li>
-                {% endif %}
-            </ul>
+            
+            function cancelRequest(username, formID, vehicleType, requestedBy) {
+                var remarks = prompt("Enter remarks for cancellation:");
+                if (remarks === null) {
+                    return; // User clicked "Cancel"
+                }
+                if (remarks.trim() === '') {
+                    alert('Please enter remarks.');
+                    return;
+                }
+            
+                // Construct the URL with parameters
+                const url = `/cancel_request?form_id=${encodeURIComponent(formID)}&vehicle_type=${encodeURIComponent(vehicleType)}&requested_by=${encodeURIComponent(requestedBy)}`;
+            
+                fetch(url, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        'username': username,
+                        'remarks': remarks,
+                    })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        alert('Request has been canceled successfully.');
+                        window.location.href = '/admin_records?username=' + encodeURIComponent(username);
+                    } else {
+                        alert('Error canceling request: ' + (data.error || 'Unknown error'));
+                    }
+                })
+                .catch(error => console.error('Error:', error));
+            }
+            
+            // Extract URL parameters
+            function getUrlParams() {
+                const urlParams = new URLSearchParams(window.location.search);
+                const formID = urlParams.get('form_id');
+                const vehicleType = urlParams.get('vehicle_type');
+                const requestedBy = urlParams.get('requested_by');
+                
+                console.log(formID, vehicleType, requestedBy); // Debugging to check values
+                
+                return { formID, vehicleType, requestedBy };
+            }
+
+           
+
+            function approveRequest(username, formID, vehicleType, requestedBy, vehicleName) {
+                let url;
+            
+                if (vehicleType === "MCM Vehicle") {
+                    // Redirect to the approved page with the formID in the URL path
+                    url = `/mcm_vehicle_approved?form_id=${encodeURIComponent(formID)}&vehicle_type=${encodeURIComponent(vehicleType)}&requested_by=${encodeURIComponent(requestedBy)}&vehicle_name=${encodeURIComponent(vehicleName)}`;
+                    window.location.href = url;
+                } else if (vehicleType === "Own Vehicle") {
+                    // Send the POST request to approve the own vehicle, passing formID instead of startDate
+                    url = `/approve_own_request?form_id=${encodeURIComponent(formID)}&vehicle_type=${encodeURIComponent(vehicleType)}&requested_by=${encodeURIComponent(requestedBy)}`;
+            
+                    fetch(url, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            'username': username
+                        })
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            alert('Request has been Approved');
+                            window.location.href = '/admin_records?username=' + encodeURIComponent(username);
+                        } else {
+                            alert('Error approving request: ' + data.error);
+                        }
+                    })
+                    .catch(error => console.error('Error:', error));
+                }
+            }
+            
+            function onApproveButtonClick(username) {
+                const vehicleName = "{{ details[0]['VehicleName'] | safe }}"; // Use | safe to prevent escaping issues
+                const { formID, vehicleType, requestedBy } = getUrlParams(); // Change to get formID from URL params
+            
+                if (vehicleName) {
+                    approveRequest(username, formID, vehicleType, requestedBy, vehicleName);
+                } else {
+                    console.error('Vehicle name is not available.'); // Debugging log
+                    alert('Vehicle details are missing, unable to approve.');
+                }
+            }            
+        </script>
+    </head>
+    <body>
+        <!-- Sidebar -->
+        <div class="sidebar">
+            <div class="badge-logo">
+                <img id="mcm" src="{{ url_for('static', filename='images/mmcm small logo.png') }}" alt="MMCM Logo">
+            </div>
+            <a href='{{ url_for('admin_dashboard_page', username=username) }}'>Dashboard</a>
+            <a href='{{ url_for('admin_requests_page', username=username) }}'>Requests</a>
+            <a href='{{ url_for('admin_records_page', username=username) }}'>Records</a>
+            <a href='{{ url_for('admin_vehicles_page', username=username) }}'>Vehicles</a>
+            <br><br>
+            <a href='{{ url_for('login_page') }}'>Log Out</a>
         </div>
-        <div class="details-box">
-            <h3 style="color: white">Travel Details:</h3>
-            <table>
-                <tr>
-                    <th>Start Date</th>
-                    <th>Start Time</th>
-                    <th>Estimated Return</th>
-                    <th>Destinations</th>
-                </tr>
-                {% for travel in details %}
+
+        <!-- Main content -->
+        <div class="main-content">
+            {% if details[0]['Approval'] == 0 and details[0]['Remarks'] is none %}
+            <h3>This is a pending request</h3>
+            {% endif %}
+            {% if details[0]['Approval'] == 0 and details[0]['Remarks'] is not none %}
+            <h3>Request has been denied</h3>
+            {% endif %}
+            {% if details[0]['Approval'] == 1 %}
+            <h3>Request has been accepted</h3>
+            {% endif %}
+            <!-- Summary box -->
+            <div class="summary-box">
+                <ul>
+                    <li><strong>Date Filled:</strong> {{ details[0]['DateFilled'] }}</li>
+                    <li><strong>Requested By:</strong> {{ details[0]['RequestedBy'] }}</li>
+                    <li><strong>Department:</strong> {{ details[0]['Department'] }} </li>
+                    <li><strong>Purpose of Trip:</strong> {{ details[0]['Purpose_Of_Trip'] }}</li>
+                    <li><strong>Vehicle Type:</strong> {{ details[0]['VehicleType'] }}</li>
+                    <br>
+                    {% if details[0]['VehicleType'] == "Own Vehicle" %}
+                        <li><strong>Vehicle Name:</strong> {{ details[0]['VehicleName'] }}</li>
+                        <li><strong>Vehicle Classification:</strong> {{ details[0]['Classification'] }}</li>
+                        <li><strong>Vehicle Seating Capacity:</strong> {{ details[0]['SeatingCapacity'] }}</li>
+                        <li><strong>Vehicle Plate Number:</strong> {{ details[0]['PlateNumber'] }}</li>
+                    {% elif details[0]['VehicleType'] == "MCM Vehicle" %}
+                        <li><strong>Vehicle Name:</strong> {{ details[0]['VehicleName'] }}</li>
+                        <li><strong>Vehicle Quantity:</strong> {{ details[0]['VehicleQuantity'] }}</li>
+                        {% if details[0]['VehicleDriver'] and details[0]['Approval'] == 1 and details[0]['Remarks'] is none %}
+                            <br>
+                            <li><strong>Vehicle Driver:</strong> {{ details[0]['VehicleDriver'] }}</li>
+                        {% endif %}
+                        {% if details[0]['VehiclePlateNumber'] and details[0]['Approval'] == 1 and details[0]['Remarks'] is none %}
+                            <li><strong>Vehicle Plate Number:</strong> {{ details[0]['VehiclePlateNumber'] }}</li>
+                        {% endif %}
+                    {% endif %}
+                    
+
+                    {% if details[0]['Remarks'] is not none %}
+                    <br><br><li><strong>Remarks for Denial: </strong> {{ details[0]['Remarks']}}</li>
+                    {% endif %}
+                </ul>
+            </div>
+            <div class="details-box">
+                <h3 style="color: white">Travel Details:</h3>
+                <table>
                     <tr>
-                        <td>{{ travel.StartDate }}</td>
-                        <td>{{ travel.StartTime }}</td>
-                        <td>{{ travel.EstimatedReturns }}</td>
-                        <td>{{ travel.Destinations }}</td>
+                        <th>Start Date</th>
+                        <th>Start Time</th>
+                        <th>Estimated Return</th>
+                        <th>Destinations</th>
                     </tr>
-                {% endfor %}
-            </table>
+                    {% for travel in details %}
+                        <tr>
+                            <td>{{ travel.StartDate }}</td>
+                            <td>{{ travel.StartTime }}</td>
+                            <td>{{ travel.EstimatedReturns }}</td>
+                            <td>{{ travel.Destinations }}</td>
+                        </tr>
+                    {% endfor %}
+                </table>
+            </div>
+            {% if details[0]['Approval'] == 0 and details[0]['Remarks'] is none %}
+            <div class="button-container">
+                <input type="button" id="deny" name="deny" value="Deny" class="deny-button" onclick="onDenyButtonClick('{{ username }}')">
+                <input type="button" id="approve" name="approve" value="Approve" class="approve-button" onclick="onApproveButtonClick('{{ username }}')">
+            </div>
+            {% endif %}
+            {% if details[0]['Approval'] == 0 and details[0]['Remarks'] is not none %}
+            <div class="button-container">
+                <input type="button" id="delete" name="delete" value="Delete" class="delete-button" onclick="onDeleteButtonClick('{{ username }}')">
+            </div>
+            {% endif %}
+            {% if details[0]['Approval'] == 1 and details[0]['Remarks'] is none %}
+            <div class="button-container">
+                <input type="button" id="cancel" name="cancel" value="Cancel" class="cancel-button" 
+                    onclick="cancelRequest('{{ username }}', '{{ details[0]['FormID'] }}', '{{ details[0]['VehicleType'] }}', '{{ details[0]['RequestedBy'] }}')">
+            </div>
+            {% endif %}
         </div>
-        {% if details[0]['Approval'] == 0 and details[0]['Remarks'] is none %}
-        <div class="button-container">
-            <input type="button" id="deny" name="deny" value="Deny" class="deny-button" onclick="onDenyButtonClick('{{ username }}')">
-            <input type="button" id="approve" name="approve" value="Approve" class="approve-button" onclick="onApproveButtonClick('{{ username }}')">
-        </div>
-        {% endif %}
-    </div>
-</body>
-</html>
+    </body>
+    </html>
